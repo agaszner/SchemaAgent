@@ -8,7 +8,7 @@ from pathlib import Path
 import sqlglot
 from sqlglot import exp
 
-from src.sql_tools import connect_readonly
+from src.sql_tools import connect_readonly, quote
 
 
 def _foreign_key(columns: list[str], reference: exp.Reference) -> dict:
@@ -51,12 +51,34 @@ def parse_ddl(ddl: str) -> dict:
     return table
 
 
+def _from_pragmas(conn, name: str) -> dict:
+    """Fallback for DDL sqlglot cannot read (e.g. Sakila's 'BLOB SUB_TYPE TEXT')."""
+    info = conn.execute(f"PRAGMA table_info({quote(name)})").fetchall()
+    fks: dict[int, dict] = {}
+    for fk_id, _, ref_table, col, ref_col, *_ in conn.execute(f"PRAGMA foreign_key_list({quote(name)})"):
+        fk = fks.setdefault(fk_id, {"columns": [], "ref_table": ref_table, "ref_columns": []})
+        fk["columns"].append(col)
+        if ref_col:
+            fk["ref_columns"].append(ref_col)
+    return {
+        "name": name,
+        "columns": [{"name": c[1], "type": c[2] or None, "not_null": bool(c[3])} for c in info],
+        "primary_key": [c[1] for c in sorted(info, key=lambda c: c[5]) if c[5]],
+        "foreign_keys": list(fks.values()),
+    }
+
+
 def parse_database(db_path: str | Path) -> dict:
+    tables = []
     with closing(connect_readonly(db_path)) as conn:
-        ddls = conn.execute(
-            "SELECT sql FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+        rows = conn.execute(
+            "SELECT name, sql FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
         ).fetchall()
-    tables = [parse_ddl(ddl) for (ddl,) in ddls]
+        for name, ddl in rows:
+            try:
+                tables.append(parse_ddl(ddl))
+            except sqlglot.errors.ParseError:
+                tables.append(_from_pragmas(conn, name))
 
     # "REFERENCES t" without columns points at t's primary key
     primary_keys = {t["name"]: t["primary_key"] for t in tables}

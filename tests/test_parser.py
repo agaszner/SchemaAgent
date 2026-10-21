@@ -4,7 +4,7 @@ from contextlib import closing
 import pytest
 
 from src.parser import parse_database
-from src.sql_tools import connect_readonly, quote
+from src.sql_tools import affinity, connect_readonly, quote
 
 DB = "data/chinook.db"
 
@@ -31,3 +31,8 @@ def test_readonly_connection_rejects_writes():
     with closing(connect_readonly(DB)) as conn:
         with pytest.raises(sqlite3.OperationalError, match="readonly"):
             conn.execute("DELETE FROM Genre")
+
+
+def test_affinity_follows_sqlite_rules():
+    types = ["INT", "VARCHAR(60)", "CLOB", None, "DOUBLE", "DECIMAL(10, 2)", "DATETIME"]
+    assert [affinity(t) for t in types] == ["INTEGER", "TEXT", "TEXT", "BLOB", "REAL", "NUMERIC", "NUMERIC"]

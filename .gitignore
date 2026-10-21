@@ -32,6 +32,10 @@ AGENTS.md
 CLAUDE.md
 .claude/
 docs/
-
+data/
 # Local app state
 app.db
+
+# Large sample databases, fetched by data/download.sh
+data/lahman.db
+data/bird/*/*.sqlite
