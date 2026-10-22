@@ -52,22 +52,38 @@ Set these as environment variables or in a `.env` file at the repo root.
 ## Command-line tools
 
 ```bash
-uv run python -m src.parser data/chinook.db     # schema model as JSON
-uv run python -m src.profiler data/chinook.db   # data profile as JSON
+uv run python -m core.parser data/chinook.db    # schema model as JSON
+uv run python -m core.profiler data/chinook.db  # data profile as JSON
 ```
 
 ## Project layout
 
 ```
-src/        pipeline logic: parser, profiler, schema graph, SQL helpers
-backend/    FastAPI app: HTTP routes, app.db storage, run orchestration
-app/        Streamlit UI
-tests/      pytest suite, run against real SQLite files
-data/       sample databases (only chinook.db is in git)
+core/                 pipeline logic, no HTTP and no UI
+  parser.py           DDL to JSON data model
+  profiler.py         data profile, masking, FK candidates
+  graph.py            relationship graph and JOIN paths
+  sqlite.py           read-only connections, identifier quoting
+api/                  FastAPI app
+  main.py config.py   app and settings
+  routes/             HTTP routes: databases, pipeline, relationships
+  payloads.py         request and response models
+  appdb.py            app.db access
+  jobs.py             runs pipeline steps in the background
+ui/                   Streamlit UI
+  main.py             entry point: theme, sidebar, navigation
+  api_client.py       HTTP client for api/
+  views/              pages: home, pipeline, management (+ management_tabs/)
+  markup.py           HTML builders and formatters
+  widgets.py          Streamlit pieces shared by several pages
+  network.py          pyvis relationship graph
+  theme.py design/    design tokens
+tests/                pytest suite mirroring core/, api/ and ui/
+data/                 sample databases (only chinook.db is in git)
 ```
 
-The pipeline runs parse, then profile, then graph. `backend/` and the UI call the
-same `src/` functions. App state lives in `app.db`, separate from the databases
+The pipeline runs parse, then profile, then graph. `api/` calls the
+`core/` functions; the UI reaches them only over HTTP. App state lives in `app.db`, separate from the databases
 being analysed.
 
 ## Safety rules

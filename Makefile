@@ -13,7 +13,7 @@ api:  ## Start the API on http://127.0.0.1:8000 (docs at /docs)
 	uv run fastapi dev
 
 ui:  ## Start the Streamlit UI on http://localhost:8501
-	uv run python -m streamlit run app/main.py
+	uv run python -m streamlit run ui/main.py
 
 test:  ## Run the test suite
 	uv run pytest -q

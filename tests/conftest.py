@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from backend.config import settings
-from backend.main import app
+from api.config import settings
+from api.main import app
 
 
 @pytest.fixture
@@ -50,20 +50,20 @@ def shop(client, shop_db) -> int:
 
 from streamlit.testing.v1 import AppTest
 
-from app import api
+from ui import api_client
 
 
 @pytest.fixture
 def ui(client, monkeypatch):
     """Runs the Streamlit app against the in-process backend.
 
-    ui() runs app/main.py with its default page (Home). ui("views/x.py") runs main.py and then that page,
+    ui() runs ui/main.py with its default page (Home). ui("views/x.py") runs main.py and then that page,
     as in production, so main.py replaces a database_id that is not registered with the first registered one.
     """
-    monkeypatch.setattr(api, "http", client)
+    monkeypatch.setattr(api_client, "http", client)
 
     def run(page: str | None = None, database_id: int | None = None, tab: str | None = None) -> AppTest:
-        at = AppTest.from_file("../app/main.py", default_timeout=30)  # relative to this file
+        at = AppTest.from_file("../ui/main.py", default_timeout=30)  # relative to this file
         if database_id is not None:
             at.session_state["database_id"] = database_id
         if tab is not None:
