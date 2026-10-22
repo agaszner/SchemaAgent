@@ -65,8 +65,24 @@ def test_restart_marks_unfinished_runs_interrupted(client, chinook):
 
 def test_rerun_seeds_each_candidate_once(client, shop):
     seeded = _relationships(shop)
-    assert [r[1:] for r in seeded] == [("inferred", "proposed", 1.0), ("inferred", "proposed", 0.79)]
+    assert [r[1:] for r in seeded] == [("inferred", "proposed", 1.0), ("inferred", "proposed", 0.8)]
     assert client.post(f"/api/databases/{shop}/runs", json={"step": "all"}).status_code == 202
     graph = client.get(f"/api/databases/{shop}/runs").json()[0]
     assert (graph["step"], graph["status"]) == ("graph", "done")  # the stored pairs did not fail the step
     assert _relationships(shop) == seeded
+
+
+def test_rerun_drops_stale_suggestions_but_keeps_reviewed_ones(client, shop):
+    def pairs():
+        with closing(sqlite3.connect(settings.app_db)) as conn:
+            return set(conn.execute("SELECT from_columns, to_table, status FROM relationships WHERE database_id = ?",
+                                    (shop,)))
+
+    with closing(sqlite3.connect(settings.app_db)) as conn, conn:  # pairs an older finder proposed
+        conn.executemany(
+            "INSERT INTO relationships (database_id, from_table, from_columns, to_table, to_columns, source, status)"
+            " VALUES (?, 'Orders', '[\"Qty\"]', ?, '[\"OrderId\"]', 'inferred', ?)",
+            [(shop, "Customer", "proposed"), (shop, "Orders", "rejected")])
+    before = pairs()
+    client.post(f"/api/databases/{shop}/runs", json={"step": "graph"})
+    assert before - pairs() == {('["Qty"]', "Customer", "proposed")}

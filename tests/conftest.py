@@ -29,14 +29,14 @@ def chinook(client, tmp_path) -> int:
 
 @pytest.fixture
 def shop_db(tmp_path) -> Path:
-    """Two inferred candidates: Orders.CustomerId -> Customer.CustomerId (1.0) and -> Orders.OrderId (0.79)."""
+    """Two inferred candidates: Orders.CustomerId -> Customer.CustomerId (1.0), Orders.ParentOrderId -> Orders.OrderId (0.8)."""
     path = tmp_path / "shop.db"
     with closing(sqlite3.connect(path)) as conn:
         conn.executescript("""
             CREATE TABLE Customer (CustomerId INTEGER PRIMARY KEY, Name TEXT);
-            CREATE TABLE Orders (OrderId INTEGER PRIMARY KEY, CustomerId INTEGER, Qty INTEGER);
+            CREATE TABLE Orders (OrderId INTEGER PRIMARY KEY, CustomerId INTEGER, ParentOrderId INTEGER, Qty INTEGER);
             INSERT INTO Customer VALUES (1, 'a'), (2, 'b'), (3, 'c');
-            INSERT INTO Orders VALUES (1, 1, 1), (2, 3, 1), (3, 3, 1), (4, 2, 1);
+            INSERT INTO Orders VALUES (1, 1, NULL, 1), (2, 3, 1, 1), (3, 3, 1, 1), (4, 2, 3, 1);
         """)
     return path
 

@@ -40,6 +40,6 @@ def test_counts_summarise_model_and_relationships(client, chinook, shop):
 
     assert counts(chinook) == [("Tables", "11", ""), ("Columns", "64", ""), ("Declared FKs", "11", ""),
                                ("Inferred edges", "0", "/ 0 to review")]
-    assert counts(shop) == [("Tables", "2", ""), ("Columns", "5", ""), ("Declared FKs", "0", ""),
+    assert counts(shop) == [("Tables", "2", ""), ("Columns", "6", ""), ("Declared FKs", "0", ""),
                             ("Inferred edges", "2", "/ 2 to review")]
     assert ui.counts(None, [])[0] == ("Tables", "—", "")

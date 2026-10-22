@@ -22,7 +22,7 @@ def test_filters_and_bulk_count():
 
 def test_review_rejects_bulk_accepts_and_logs(ui, client, shop):
     url = f"/api/databases/{shop}/relationships"
-    strong, weak = client.get(url).json()  # confidence 1.0 and 0.79
+    strong, weak = client.get(url).json()  # confidence 1.0 and 0.8
     at = ui("views/management.py", database_id=shop, tab="Relationships")
     at.button(key=f"reject:{weak['id']}").click().run()
     assert f"accept:{weak['id']}" in [b.key for b in at.button]  # a rejected row can be accepted again

@@ -32,13 +32,23 @@ def graph(conn: sqlite3.Connection, run: sqlite3.Row) -> dict:
     declared = [{"table": t["name"], **fk, "source": "declared", "status": "accepted", "confidence": 1.0}
                 for t in model["tables"] for fk in t["foreign_keys"]]
     inferred = [{**c, "source": "inferred", "status": "proposed"} for c in candidates]
-    # ON CONFLICT skips only a stored pair, so review decisions and manual edges survive re-runs;
-    # unlike OR IGNORE, a row breaking CHECK or NOT NULL still raises and fails the step
+    # Drop untouched suggestions the profile no longer makes (e.g. after a finder change); reviewed rows stay
+    fresh = {(c["table"], tuple(c["columns"]), c["ref_table"], tuple(c["ref_columns"])) for c in candidates}
+    stale = [(row["id"],) for row in conn.execute(
+        "SELECT id, from_table, from_columns, to_table, to_columns FROM relationships"
+        " WHERE database_id = ? AND source = 'inferred' AND status = 'proposed'", (run["database_id"],))
+        if (row["from_table"], tuple(row["from_columns"]), row["to_table"], tuple(row["to_columns"])) not in fresh]
+    conn.executemany("DELETE FROM relationships WHERE id = ?", stale)
+    # ON CONFLICT leaves a stored pair alone, so review decisions and manual edges survive re-runs,
+    # but refreshes an untouched suggestion's confidence; unlike OR IGNORE, a row breaking CHECK or
+    # NOT NULL still raises and fails the step
     conn.executemany(
         "INSERT INTO relationships"
         " (database_id, from_table, from_columns, to_table, to_columns, source, status, confidence)"
         " VALUES (:database_id, :table, :columns, :ref_table, :ref_columns, :source, :status, :confidence)"
-        " ON CONFLICT (database_id, from_table, from_columns, to_table, to_columns) DO NOTHING",
+        " ON CONFLICT (database_id, from_table, from_columns, to_table, to_columns) DO UPDATE"
+        " SET confidence = excluded.confidence"
+        " WHERE relationships.source = 'inferred' AND relationships.status = 'proposed'",
         [{**rel, "database_id": run["database_id"]} for rel in declared + inferred],
     )
     return {"declared": len(declared), "inferred": len(inferred)}  # found, not inserted: re-runs insert nothing

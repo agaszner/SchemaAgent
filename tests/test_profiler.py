@@ -19,19 +19,29 @@ def test_profile_never_leaks_sensitive_values():
     assert all(row["Phone"] in (MASK, None) for row in customer["sample_rows"])
 
 
-def test_finds_undeclared_fk_from_values(tmp_path):
+def test_fk_candidates_need_matching_names_and_values(tmp_path):
     db = tmp_path / "shop.db"
     with closing(sqlite3.connect(db)) as conn:
         conn.executescript("""
             CREATE TABLE Customer (CustomerId INTEGER PRIMARY KEY, Name TEXT);
             CREATE TABLE Orders (OrderId INTEGER PRIMARY KEY, CustomerId INTEGER, Qty INTEGER);
+            CREATE TABLE People (playerID TEXT, name TEXT);
+            CREATE TABLE Batting (playerID TEXT, yearID INTEGER, stint INTEGER);
+            CREATE TABLE Pitching (playerID TEXT, yearID INTEGER, stint INTEGER);
+            CREATE UNIQUE INDEX batting_key ON Batting (playerID, yearID, stint);
+            CREATE UNIQUE INDEX pitching_key ON Pitching (playerID, yearID, stint);
             INSERT INTO Customer VALUES (1, 'a'), (2, 'b'), (3, 'c');
-            INSERT INTO Orders VALUES (1, 1, 1), (2, 3, 1), (3, 3, 1), (4, 2, 1);
+            INSERT INTO Orders VALUES (1, 1, 3), (2, 3, 2), (3, 3, 1), (4, 2, 1);
+            INSERT INTO People VALUES ('a', 'A'), ('b', 'B');
+            INSERT INTO Batting VALUES ('a', 2000, 1), ('a', 2000, 2), ('b', 2001, 1);
+            INSERT INTO Pitching VALUES ('a', 2000, 1), ('a', 2000, 2), ('a', 2001, 1);
         """)
-    candidates = profile_database(db)["fk_candidates"]
-    best = candidates[0]
-    assert (best["table"], best["columns"], best["ref_table"]) == ("Orders", ["CustomerId"], "Customer")
-    assert not any(c["columns"] == ["Qty"] for c in candidates)
+    found = {(c["table"], tuple(c["columns"]), c["ref_table"]) for c in profile_database(db)["fk_candidates"]}
+    assert found == {
+        ("Orders", ("CustomerId",), "Customer"),
+        ("Batting", ("playerID",), "People"),  # People has no key; the data shows playerID unique
+        ("Pitching", ("playerID",), "People"),
+    }  # not Orders.Qty (ids 1..3 by value only) and not Pitching -> Batting (twin composite keys)
 
 
 def test_find_path_customer_to_track():

@@ -2,7 +2,7 @@ def test_review_filters_accepts_rejects_and_logs(client, shop):
     url = f"/api/databases/{shop}/relationships"
     strong, weak = client.get(url, params={"source": "inferred"}).json()
     assert [(r["to_table"], r["confidence"], r["status"]) for r in (strong, weak)] == [
-        ("Customer", 1.0, "proposed"), ("Orders", 0.79, "proposed")]
+        ("Customer", 1.0, "proposed"), ("Orders", 0.8, "proposed")]
     accepted = client.post(f"{url}/accept", json={"min_confidence": 0.9}).json()
     assert [r["id"] for r in accepted] == [strong["id"]]
     r = client.patch(f"/api/relationships/{weak['id']}", json={"status": "rejected"}, headers={"X-Actor": "anna"})

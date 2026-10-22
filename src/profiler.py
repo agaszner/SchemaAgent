@@ -5,7 +5,6 @@ import sqlite3
 import sys
 from collections.abc import Collection, Iterable
 from contextlib import closing
-from difflib import SequenceMatcher
 from pathlib import Path
 
 from src.parser import parse_database
@@ -87,41 +86,106 @@ def value_coverage(conn: sqlite3.Connection, table: str, columns: list[str],
     return round(coverage(values, keys), 4)
 
 
-def find_fk_candidates(conn: sqlite3.Connection, model: dict, min_coverage: float = 1.0) -> list[dict]:
-    """Columns whose values all appear among another table's single-column key.
+def _norm(name: str) -> str:
+    return "".join(ch for ch in name.lower() if ch.isalnum())
 
-    Surrogate keys (1..N) make every small id range a subset of every bigger one, so
-    sources that are their own table's key, already have a declared FK, or hold a
-    single value are skipped.
+
+def name_score(column: str, ref_table: str, ref_column: str) -> float:
+    """How well a column name points at ref_table.ref_column: 1.0 exact, less for looser forms, 0.0 none.
+
+    CustomerId -> Customer.CustomerId, customer_id -> customer.id and playerID -> People.playerID
+    score 1.0; manager_staff_id -> staff.staff_id 0.8; cds -> schools.CDSCode 0.7; ID -> Patient.ID 0.5.
     """
-    targets = {}
-    for table in model["tables"]:
-        if len(table["primary_key"]) == 1:
-            key = table["primary_key"][0]
-            targets[(table["name"], key)] = distinct_values(conn, table["name"], [key])
+    s, k, t = _norm(column), _norm(ref_column), _norm(ref_table)
+    prefixed = {t + k, t.removesuffix("s") + k}  # Customers + ID -> customerid
+    if s in prefixed or (s == k and k != "id"):
+        return 1.0
+    if any(s.endswith(p) for p in prefixed) or (len(k) >= 4 and s.endswith(k)):
+        return 0.8
+    if len(s) >= 3 and k.startswith(s):
+        return 0.7
+    if s == k:  # ID -> Patient.ID: every table may have an "id", so the name alone says little
+        return 0.5
+    return 0.0
+
+
+def _unique_keys(conn: sqlite3.Connection, table: dict) -> list[list[str]]:
+    """Column lists that are unique in the table: the primary key and full unique indexes."""
+    keys = [table["primary_key"]] if table["primary_key"] else []
+    for _, index, unique, _, partial in conn.execute(f"PRAGMA index_list({quote(table['name'])})"):
+        if unique and not partial:
+            columns = [c for *_, c in conn.execute(f"PRAGMA index_info({quote(index)})")]
+            if None not in columns and set(columns) not in map(set, keys):  # None: an expression index
+                keys.append(columns)
+    return keys
+
+
+def _is_unique(conn: sqlite3.Connection, table: str, column: str) -> bool:
+    """True when the data makes the column a key: no NULLs and no repeats in a non-empty table."""
+    c = quote(column)
+    total, filled, distinct = conn.execute(
+        f"SELECT COUNT(*), COUNT({c}), COUNT(DISTINCT {c}) FROM {quote(table)}").fetchone()
+    return total > 0 and total == filled == distinct
+
+
+def find_fk_candidates(conn: sqlite3.Connection, model: dict, min_coverage: float = 0.9) -> list[dict]:
+    """Columns that name another table's key and whose values mostly appear among it.
+
+    Both kinds of evidence are required, not either one as the spec allows: surrogate ids
+    (1..N) make nearly every integer column a value subset of every key, so values alone
+    proposed ~100 wrong pairs on formula_1. Targets are primary keys, unique indexes and
+    columns the data shows unique in tables without a primary key, so keyless databases
+    (Lahman) still get candidates; in keyed tables data-unique columns are coincidences
+    (sakila's two staff rows make staff.store_id unique).
+    A composite key matches only when the source has every key column by its exact name.
+    confidence = coverage x name_score.
+    """
+    tables = {t["name"]: t for t in model["tables"]}
+    keys = {name: _unique_keys(conn, t) for name, t in tables.items()}
+    unique_cache: dict[tuple[str, str], bool] = {}
+
+    def is_key(table: str, column: str) -> bool:
+        if [column] in keys[table]:
+            return True
+        if tables[table]["primary_key"]:
+            return False
+        # ponytail: tiny keyless tables look unique by chance (2 rows, stint 1 and 2); add a min row count if it bites
+        if (table, column) not in unique_cache:
+            unique_cache[(table, column)] = _is_unique(conn, table, column)
+        return unique_cache[(table, column)]
+
+    def matches(table: dict) -> list[tuple[list[str], str, list[str], float]]:
+        """(columns, ref_table, ref_columns, name score) pairs the names suggest for this source table."""
+        own = {_norm(c["name"]): c["name"] for c in table["columns"]}
+        found = []
+        for ref in tables.values():
+            for key in keys[ref["name"]]:
+                if len(key) > 1 and all(_norm(k) in own for k in key):
+                    found.append(([own[_norm(k)] for k in key], ref["name"], key, 1.0))
+            for column in table["columns"]:
+                for ref_column in ref["columns"]:
+                    score = name_score(column["name"], ref["name"], ref_column["name"])
+                    if score and is_key(ref["name"], ref_column["name"]):
+                        found.append(([column["name"]], ref["name"], [ref_column["name"]], score))
+        return found
 
     candidates = []
-    for table in model["tables"]:
-        declared = {c for fk in table["foreign_keys"] for c in fk["columns"]}
-        own_key = table["primary_key"] if len(table["primary_key"]) == 1 else []
-        for column in table["columns"]:
-            name = column["name"]
-            if name in declared or name in own_key:
+    for table in tables.values():
+        declared = [fk["columns"] for fk in table["foreign_keys"]]
+        for columns, ref_table, ref_columns, score in matches(table):
+            if (ref_table, ref_columns) == (table["name"], columns) or columns in declared:
                 continue
-            values = distinct_values(conn, table["name"], [name])
-            if len(values) < 2:  # constants like Quantity=1 fit every key range
+            if set(columns) in map(set, keys[table["name"]]) and (len(columns) > 1 or score <= 0.5):
+                continue  # key to key: twin fact tables (Batting/Pitching) or two bare IDs (Parks.ID, People.ID)
+            share = value_coverage(conn, table["name"], columns, ref_table, ref_columns)
+            if share < min_coverage:
                 continue
-            for (ref_table, ref_column), keys in targets.items():
-                share = coverage(values, keys)
-                if share < min_coverage:
-                    continue
-                similarity = SequenceMatcher(None, name.lower(), ref_column.lower()).ratio()
-                candidates.append({
-                    "table": table["name"], "columns": [name],
-                    "ref_table": ref_table, "ref_columns": [ref_column],
-                    "coverage": round(share, 4),
-                    "confidence": round((share + similarity) / 2, 2),
-                })
+            candidates.append({
+                "table": table["name"], "columns": columns,
+                "ref_table": ref_table, "ref_columns": ref_columns,
+                "coverage": share,
+                "confidence": round(share * score, 2),
+            })
     return sorted(candidates, key=lambda c: -c["confidence"])
 
 
