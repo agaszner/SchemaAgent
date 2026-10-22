@@ -46,3 +46,28 @@ def shop(client, shop_db) -> int:
     db = client.post("/api/databases", json={"path": str(shop_db)}).json()["id"]
     client.post(f"/api/databases/{db}/runs", json={"step": "all"})
     return db
+
+
+from streamlit.testing.v1 import AppTest
+
+from app import api
+
+
+@pytest.fixture
+def ui(client, monkeypatch):
+    """Runs the Streamlit app against the in-process backend.
+
+    ui() runs app/main.py with its default page (Home). ui("views/x.py") runs main.py and then that page,
+    as in production, so main.py replaces a database_id that is not registered with the first registered one.
+    """
+    monkeypatch.setattr(api, "http", client)
+
+    def run(page: str | None = None, database_id: int | None = None, tab: str | None = None) -> AppTest:
+        at = AppTest.from_file("../app/main.py", default_timeout=30)  # relative to this file
+        if database_id is not None:
+            at.session_state["database_id"] = database_id
+        if tab is not None:
+            at.query_params["tab"] = tab
+        return (at.switch_page(page) if page else at).run()
+
+    return run

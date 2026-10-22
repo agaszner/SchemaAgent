@@ -1,0 +1,234 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+/* SchemaSage components. Every value comes from tokens.css; inject both once per page. */
+
+.ss {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--ink);
+  background: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+.ss *, .ss *::before, .ss *::after { box-sizing: border-box; }
+.ss :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+.ss-ident {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.ss-meta { font-size: 13px; line-height: 19px; color: var(--ink-muted); }
+.ss-faint { color: var(--ink-faint); }
+
+/* Tag: a word with a marker. Colour is never the only signal. */
+.ss-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 1px var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-raised);
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+.ss-tag::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: none;
+  background: currentColor;
+}
+.ss-tag--plain::before { display: none; }
+.ss-tag--ok { color: var(--ok); background: var(--ok-wash); border-color: transparent; }
+.ss-tag--ok::before { border-radius: var(--radius-round); }
+.ss-tag--run { color: var(--accent); background: var(--accent-wash); border-color: transparent; }
+.ss-tag--run::before { background: none; border: 1.5px solid currentColor; border-radius: var(--radius-round); }
+.ss-tag--error { color: var(--danger); background: var(--danger-wash); border-color: transparent; }
+.ss-tag--error::before { width: 8px; height: 8px; clip-path: polygon(20% 0, 50% 30%, 80% 0, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0 80%, 30% 50%, 0 20%); }
+.ss-tag--warn { color: var(--warn); background: var(--warn-wash); border-color: transparent; }
+.ss-tag--warn::before { clip-path: polygon(50% 0, 100% 100%, 0 100%); width: 8px; height: 8px; }
+.ss-tag--idle::before { background: none; border: 1.5px dashed currentColor; border-radius: var(--radius-round); }
+.ss-tag--mono { font-family: var(--font-mono); font-weight: 500; letter-spacing: 0; }
+
+/* Relationship source tags mirror the graph edge styles. */
+.ss-src::before { width: 14px; height: 0; background: none; border-top: 2px solid currentColor; }
+.ss-src--declared { color: var(--edge-declared); }
+.ss-src--manual, .ss-src--accepted { color: var(--ok); }
+.ss-src--manual::before, .ss-src--accepted::before { border-top: 3px solid var(--edge-accepted); }
+.ss-src--inferred { color: var(--ink-muted); }
+.ss-src--inferred::before { border-top: 2px dashed var(--edge-inferred); }
+
+/* Join path: identifiers joined by arrows, wraps at arrows. */
+.ss-path { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); margin: 0; padding: 0; list-style: none; }
+.ss-path li { display: inline-flex; align-items: center; gap: var(--space-2); }
+.ss-path li + li::before { content: "→"; color: var(--ink-faint); font-family: var(--font-mono); }
+.ss-path code {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-raised);
+}
+.ss-path small { font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); }
+.ss-path--assumed code { border-style: dashed; border-color: var(--edge-inferred); }
+
+/* Panel: hairline box, no shadow, no accent stripe. */
+.ss-panel { border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--paper-raised); }
+.ss-panel > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+.ss-panel > header h3 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 600; }
+.ss-panel__body { padding: var(--space-3) var(--space-4); }
+
+/* Definition grid used by evidence and match checks. */
+.ss-dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-4); margin: 0; }
+.ss-dl dt { font-size: 12px; line-height: 20px; font-weight: 500; letter-spacing: 0.02em; color: var(--ink-muted); }
+.ss-dl dd { margin: 0; min-width: 0; }
+
+.ss-calls { margin: 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: 13px; line-height: 20px; }
+.ss-calls li { display: flex; gap: var(--space-2); }
+.ss-calls b { font-weight: 500; }
+.ss-calls span { color: var(--ink-faint); }
+.ss-calls span:last-child { margin-left: auto; }
+
+/* Notice: abstention, refusal, low match. Full box, word first. */
+.ss-notice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-control);
+  border-radius: var(--radius-md);
+  background: var(--paper-raised);
+}
+.ss-notice p { margin: 0; grid-column: 2; }
+.ss-notice .ss-tag { grid-row: 1 / span 2; align-self: start; margin-top: 2px; }
+.ss-notice--warn { background: var(--warn-wash); border-color: transparent; }
+.ss-notice--refused { background: var(--danger-wash); border-color: transparent; }
+
+/* Answer meta line under a chat answer. */
+.ss-answer-meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: 13px; line-height: 19px; color: var(--ink-muted); }
+.ss-answer-meta b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); }
+
+/* Pipeline steps: one row per step, a ledger, not cards. */
+.ss-steps { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ss-steps th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-muted);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line-control);
+}
+.ss-steps td { padding: var(--space-3); border-bottom: 1px solid var(--line); vertical-align: middle; }
+.ss-steps td.num { font-family: var(--font-mono); font-size: 13px; text-align: right; color: var(--ink-muted); }
+.ss-steps th.num { text-align: right; }
+.ss-steps tr.is-running td { background: var(--accent-wash); }
+.ss-steps .step { font-weight: 600; }
+.ss-steps .step small { display: block; font-weight: 400; font-size: 13px; color: var(--ink-muted); }
+.ss-steps .err { display: block; margin-top: 2px; font-family: var(--font-mono); font-size: 12.5px; color: var(--danger); }
+.ss-bar { height: 3px; margin-top: 6px; background: var(--line); }
+.ss-bar > i { display: block; height: 100%; background: var(--accent); }
+
+/* Stat strip: counts in one row, divided by hairlines. */
+.ss-stats { display: flex; flex-wrap: wrap; border-top: 1px solid var(--line-control); border-bottom: 1px solid var(--line); }
+.ss-stats div { flex: 1 1 120px; padding: var(--space-3) var(--space-4) var(--space-3) 0; }
+.ss-stats div + div { padding-left: var(--space-4); border-left: 1px solid var(--line); }
+.ss-stats dt { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.02em; color: var(--ink-muted); }
+.ss-stats dd { margin: var(--space-1) 0 0; font-family: var(--font-mono); font-size: 24px; line-height: 28px; font-weight: 500; }
+.ss-stats dd small { font-size: 13px; color: var(--ink-faint); font-weight: 400; }
+
+/* Graph legend. Same strokes the pyvis graph draws. */
+.ss-legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--ink-muted); }
+.ss-legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
+.ss-legend svg { flex: none; }
+
+/* Relationship rows on Kezelés. */
+.ss-rels { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line-control); }
+.ss-rel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.ss-rel__edge { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.ss-rel__facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); grid-column: 1; font-size: 13px; color: var(--ink-muted); }
+.ss-rel__actions { grid-row: 1 / span 2; grid-column: 2; display: flex; gap: var(--space-2); }
+.ss-rel.is-rejected .ss-rel__edge { text-decoration: line-through; text-decoration-color: var(--ink-faint); color: var(--ink-faint); }
+
+/* Confidence: number first, bar second. */
+.ss-conf { display: inline-flex; align-items: center; gap: var(--space-2); font-family: var(--font-mono); font-size: 13px; color: var(--ink); }
+.ss-conf i { position: relative; width: 48px; height: 4px; background: var(--line); }
+.ss-conf i > b { position: absolute; inset: 0 auto 0 0; background: var(--ink-muted); }
+
+/* Buttons: only for reference rows; real buttons are st.button. */
+.ss-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 30px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-control);
+  border-radius: var(--radius-md);
+  background: var(--paper-raised);
+  font: 500 13px/1 var(--font-sans);
+  color: var(--ink);
+  cursor: pointer;
+}
+.ss-btn--primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.ss-btn--danger { color: var(--danger); }
+.ss-btn:disabled { color: var(--ink-faint); border-color: var(--line); background: transparent; cursor: not-allowed; }
+
+/* Chat turn composition (st.chat_message look, themed). */
+.ss-turn { display: grid; grid-template-columns: 28px 1fr; gap: var(--space-3); padding: var(--space-3) 0; }
+.ss-turn + .ss-turn { border-top: 1px solid var(--line); }
+.ss-who {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-control);
+  border-radius: var(--radius-md);
+  font: 600 12px/1 var(--font-mono);
+  color: var(--ink-muted);
+}
+.ss-turn--agent .ss-who { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.ss-turn__body { min-width: 0; display: grid; gap: var(--space-3); }
+.ss-turn__body > p { margin: 0; }
+.ss-sql {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--paper-sunk);
+  border-radius: var(--radius-md);
+  font: 400 13px/20px var(--font-mono);
+  color: var(--ink);
+  overflow-x: auto;
+  white-space: pre;
+}
+.ss-sql .k { color: var(--accent); font-weight: 500; }
+.ss-sql .s { color: var(--ok); }
+.ss-table { width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid var(--line); }
+.ss-table th { text-align: left; font-weight: 500; color: var(--ink-muted); background: var(--paper-sunk); padding: 6px var(--space-3); border-bottom: 1px solid var(--line); }
+.ss-table td { padding: 6px var(--space-3); border-bottom: 1px solid var(--line); }
+.ss-table td.num, .ss-table th.num { text-align: right; font-family: var(--font-mono); }
+.ss-expander { border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--paper-raised); }
+.ss-expander > summary { padding: var(--space-2) var(--space-3); font-size: 13px; font-weight: 500; color: var(--ink-muted); cursor: pointer; }
+.ss-expander[open] > summary { border-bottom: 1px solid var(--line); }
+.ss-expander > .ss-dl { padding: var(--space-3); }
