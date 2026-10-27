@@ -10,6 +10,7 @@ theme.inject()
 
 PAGES = [
     st.Page("views/home.py", title="Home", default=True),
+    st.Page("views/explorer.py", title="Explorer"),
     st.Page("views/pipeline.py", title="Pipeline"),
     st.Page("views/management.py", title="Management"),
 ]

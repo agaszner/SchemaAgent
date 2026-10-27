@@ -2,6 +2,7 @@
 
 import os
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -52,3 +53,13 @@ def model(database_id: int) -> dict | None:
 
 def profile(database_id: int) -> dict | None:
     return _result(database_id, "profile")
+
+
+def rows(database_id: int, table: str, **params) -> dict | None:
+    try:
+        return request("GET", f"/databases/{database_id}/tables/{quote(table, safe='')}/rows",
+                       params={k: v for k, v in params.items() if v is not None})
+    except ApiError as err:
+        if err.status == 409:  # the parse step has not run yet, or the file changed since
+            return None
+        raise
