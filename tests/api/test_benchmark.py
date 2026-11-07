@@ -39,7 +39,7 @@ def test_benchmark_runs_every_question_in_every_config(client, chinook, fake_llm
     assert len(out["rows"]) == 9
     with open(settings.benchmark_dir / "results.csv", newline="", encoding="utf-8") as f:
         lines = list(csv.reader(f))
-    assert ",".join(lines[0]).startswith("config,id,category,kind,") and len(lines) == 10
+    assert ",".join(lines[0]).startswith("database,config,id,category,kind,") and len(lines) == 10
     assert ",".join(lines[0]).endswith(",cost_usd,answer,tables,columns,path,first_sql,sql,error")
     calls = fake_llm.calls[before:]
     assert len(calls) == 9
@@ -47,6 +47,20 @@ def test_benchmark_runs_every_question_in_every_config(client, chinook, fake_llm
     assert all(x["input"].startswith("## Schema (DDL)") for x in a)
     assert all(x["input"].startswith("## Tables") for x in b + c)
     assert [("## Data profile" in x["input"]) for x in calls] == [False] * 6 + [True] * 3
+
+
+def test_results_csv_keeps_other_databases(client, chinook, fake_llm):
+    write_benchmark()
+    fake_llm.reply = ANSWER
+    path = settings.benchmark_dir / "results.csv"
+    path.write_text("database,config,id\nother,A,fd01\n", encoding="utf-8")
+    for _ in range(2):
+        start(client, chinook)
+        with open(path, newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        assert [r["database"] for r in rows].count("other") == 1
+        assert [r["database"] for r in rows].count("chinook") == 9
+    assert rows[0]["database"] == "other"
 
 
 def test_get_without_a_benchmark_run_is_null(client, chinook):

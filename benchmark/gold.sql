@@ -81,3 +81,68 @@ SELECT COUNT(*)
 FROM Track t
 JOIN Genre g ON g.GenreId = t.GenreId
 WHERE g.Name = 'Sci Fi & Fantasy';
+
+-- fd01
+SELECT COUNT(*) FROM loan WHERE duration = 60;
+
+-- fd02
+SELECT A2 FROM district ORDER BY A11 LIMIT 1;
+
+-- fd03
+SELECT COUNT(*) FROM district WHERE CAST(A4 AS INTEGER) > 100000;
+
+-- fd04
+SELECT COUNT(*) FROM account WHERE strftime('%Y', date) = '1996';
+
+-- fd05
+SELECT A3 FROM district GROUP BY A3 ORDER BY COUNT(*) DESC LIMIT 1;
+
+-- fd06
+SELECT d.A2, COUNT(*)
+FROM district d
+JOIN account a ON a.district_id = d.district_id
+GROUP BY d.district_id
+ORDER BY COUNT(*) DESC
+LIMIT 5;
+
+-- fd07
+SELECT d.A3, SUM(l.amount)
+FROM loan l
+JOIN account a ON a.account_id = l.account_id
+JOIN district d ON d.district_id = a.district_id
+GROUP BY d.A3;
+
+-- fd08
+SELECT COUNT(*)
+FROM card c
+JOIN disp p ON p.disp_id = c.disp_id
+JOIN client cl ON cl.client_id = p.client_id
+WHERE cl.birth_date < '1950-01-01';
+
+-- fd09
+SELECT ROUND(AVG(l.amount), 2)
+FROM loan l
+JOIN account a ON a.account_id = l.account_id
+JOIN district d ON d.district_id = a.district_id
+WHERE d.A11 > 10000;
+
+-- fd10
+SELECT COUNT(DISTINCT l.account_id)
+FROM loan l
+JOIN disp p ON p.account_id = l.account_id
+JOIN card c ON c.disp_id = p.disp_id;
+
+-- fd11
+SELECT COUNT(*) FROM trans WHERE type = 'PRIJEM';
+
+-- fd12
+SELECT COUNT(*) FROM trans WHERE operation = 'VYBER KARTOU';
+
+-- fd13
+SELECT COUNT(DISTINCT account_id) FROM trans WHERE k_symbol = 'DUCHOD';
+
+-- fd14
+SELECT ROUND(SUM(amount), 2) FROM "order" WHERE k_symbol = 'POJISTNE';
+
+-- fd15
+SELECT COUNT(*) FROM account WHERE frequency = 'POPLATEK MESICNE';

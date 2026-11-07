@@ -170,14 +170,20 @@ def benchmark(conn: sqlite3.Connection, run: sqlite3.Row) -> dict:
                 if type(e) is not ValueError:  # GuardError (a broken gold query) and ValidationError fail the run
                     raise
                 row = _refused(config, question)  # ask()'s refusal: one wrong answer, not a failed run
-            rows.append(row)
+            rows.append({"database": run["name"], **row})
             result["done"] += 1
             progress()
     settings.benchmark_dir.mkdir(parents=True, exist_ok=True)
-    with open(settings.benchmark_dir / "results.csv", "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+    path = settings.benchmark_dir / "results.csv"
+    kept = []
+    if path.exists():
+        with open(path, newline="", encoding="utf-8") as f:
+            # a file from before the database column holds chinook runs only
+            kept = [r for r in ({"database": "chinook", **r} for r in csv.DictReader(f)) if r["database"] != run["name"]]
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0]), restval="", extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(kept + rows)
     return {**result, "summary": summarize(rows), "rows": rows}
 
 

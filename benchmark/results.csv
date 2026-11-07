@@ -1,50 +1,50 @@
-config,id,category,kind,answer_kind,correct,score,path_correct,first_valid,repaired,claims,unsupported,latency_s,input_tokens,output_tokens,cost_usd,answer,tables,columns,path,first_sql,sql,error
-A,s01,schema,columns,schema,True,1.0,,,,2,0,1.9533735000004526,1534,45,0.0001759,The Customer table holds a customer's email address in the Email column.,Customer,Customer.Email,,,,
-A,s02,schema,columns,schema,True,1.0,,,,2,0,1.8251184590044431,1539,52,0.0001799,"A track’s playing time is stored in the `Track.Milliseconds` column, in milliseconds.",Track,Track.Milliseconds,,,,
-A,s03,schema,columns,schema,True,1.0,,,,3,0,2.005484458000865,1535,58,0.0001825,The Employee.ReportsTo column records which employee an employee reports to; it references Employee.EmployeeId.,Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
-A,s04,schema,columns,schema,True,1.0,,,,2,0,2.005972290993668,1536,51,0.00017910000000000002,The date an employee was hired is stored in the Employee table’s HireDate column.,Employee,Employee.HireDate,,,,
-A,s05,schema,columns,schema,True,1.0,,,,2,0,2.080145416999585,1536,46,0.0001766,The track file size is stored in the `Track.Bytes` column.,Track,Track.Bytes,,,,
-A,s06,schema,relationship,schema,True,1.0,True,,,4,0,2.032490166995558,1535,61,0.000184,"An invoice is connected to its customer through Invoice.CustomerId, which references Customer.CustomerId.",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
-A,s07,schema,relationship,schema,True,1.0,True,,,4,0,2.20244766700489,1538,74,0.0001908,"Customer.SupportRepId references Employee.EmployeeId, linking each customer to their supporting employee; SupportRepId is nullable. There is no separate link table.",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
-A,s08,schema,relationship,schema,True,1.0,True,,,4,0,1.9718478749855421,1538,81,0.0001943,"A track is linked to its album through Track.AlbumId, which references Album.AlbumId. Track.AlbumId is nullable, so a track may have no associated album.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
-A,s09,schema,relationship,schema,True,1.0,True,,,4,0,1.8882863329927204,1539,69,0.0001884,"InvoiceLine refers to the sold track through its TrackId column, which is a foreign key to Track.TrackId.",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
-A,s10,schema,relationship,schema,True,1.0,True,,,4,0,1.9991588330012746,1535,67,0.000187,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
-A,s11,schema,path,schema,True,1.0,True,,,10,0,2.121384666999802,1538,104,0.00020580000000000002,"Join Customer to Invoice on CustomerId, then Invoice to InvoiceLine on InvoiceId, and InvoiceLine to Track on TrackId. These are direct foreign-key relationships.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
-A,s12,schema,path,schema,True,1.0,True,,,15,0,2.5876968749944353,1545,134,0.0002215,"Join Playlist to PlaylistTrack, then Track and Album to reach Artist; filter by the playlist name. The Album-to-Artist relationship is established by Album.ArtistId referencing Artist.ArtistId.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
-A,s13,schema,path,schema,True,1.0,True,,,10,0,2.661432666995097,1539,116,0.0002119,"Join Artist to Album on ArtistId, then Album to Track on AlbumId, and Track to Genre on GenreId. Track.GenreId is nullable, so tracks without a genre will not match a Genre row.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
-A,s14,schema,path,schema,True,1.0,True,,,7,0,2.2026091669977177,1543,103,0.00020580000000000002,"Join Customer to Employee using Customer.SupportRepId = Employee.EmployeeId, then join Customer to Invoice using Customer.CustomerId = Invoice.CustomerId. The schema defines these foreign keys; this links each support employee to invoices for their supported customers.",Employee; Customer; Invoice,Customer.SupportRepId; Employee.EmployeeId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
-A,s15,schema,path,schema,True,1.0,True,,,11,0,2.4421027500065975,1543,119,0.00021380000000000002,"Join Invoice to InvoiceLine using InvoiceId, then InvoiceLine to Track using TrackId, and Track to MediaType using MediaTypeId. These relationships are specified by foreign keys in the schema.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
-A,s16,schema,unanswerable,abstain,True,,,,,0,0,1.4953406670101685,1531,40,0.0001731,The schema does not show a field that records refunds.,,,,,,
-A,s17,schema,unanswerable,abstain,True,,,,,0,0,2.0265230419900035,1536,42,0.00017460000000000002,The schema contains no column for a track’s average user rating.,,,,,,
-A,s18,schema,unanswerable,abstain,True,,,,,0,0,1.9736160410102457,1537,40,0.00017370000000000002,The schema contains no table for customer sign-in events.,,,,,,
-A,s19,schema,unanswerable,abstain,True,,,,,0,0,1.9800176249991637,1540,57,0.0001825,"The schema has no inventory or stock table or column, so it does not specify where the number of album copies left in stock is kept.",,,,,,
-A,s20,schema,unanswerable,abstain,True,,,,,0,0,1.9001910829974804,1535,47,0.000177,The schema has no customer date-of-birth column; Customer contains no birth-date field.,,,,,,
-A,d01,data,simple,sql,True,,,True,,0,0,2.057202416996006,1533,55,0.0001808,Counts the customers whose country is Germany.,Customer,Customer.Country,,"SELECT COUNT(*) AS customer_count
+database,config,id,category,kind,answer_kind,correct,score,path_correct,first_valid,repaired,claims,unsupported,latency_s,input_tokens,output_tokens,cost_usd,answer,tables,columns,path,first_sql,sql,error
+chinook,A,s01,schema,columns,schema,True,1.0,,,,2,0,1.9533735000004526,1534,45,0.0001759,The Customer table holds a customer's email address in the Email column.,Customer,Customer.Email,,,,
+chinook,A,s02,schema,columns,schema,True,1.0,,,,2,0,1.8251184590044431,1539,52,0.0001799,"A track’s playing time is stored in the `Track.Milliseconds` column, in milliseconds.",Track,Track.Milliseconds,,,,
+chinook,A,s03,schema,columns,schema,True,1.0,,,,3,0,2.005484458000865,1535,58,0.0001825,The Employee.ReportsTo column records which employee an employee reports to; it references Employee.EmployeeId.,Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
+chinook,A,s04,schema,columns,schema,True,1.0,,,,2,0,2.005972290993668,1536,51,0.00017910000000000002,The date an employee was hired is stored in the Employee table’s HireDate column.,Employee,Employee.HireDate,,,,
+chinook,A,s05,schema,columns,schema,True,1.0,,,,2,0,2.080145416999585,1536,46,0.0001766,The track file size is stored in the `Track.Bytes` column.,Track,Track.Bytes,,,,
+chinook,A,s06,schema,relationship,schema,True,1.0,True,,,4,0,2.032490166995558,1535,61,0.000184,"An invoice is connected to its customer through Invoice.CustomerId, which references Customer.CustomerId.",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
+chinook,A,s07,schema,relationship,schema,True,1.0,True,,,4,0,2.20244766700489,1538,74,0.0001908,"Customer.SupportRepId references Employee.EmployeeId, linking each customer to their supporting employee; SupportRepId is nullable. There is no separate link table.",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
+chinook,A,s08,schema,relationship,schema,True,1.0,True,,,4,0,1.9718478749855421,1538,81,0.0001943,"A track is linked to its album through Track.AlbumId, which references Album.AlbumId. Track.AlbumId is nullable, so a track may have no associated album.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
+chinook,A,s09,schema,relationship,schema,True,1.0,True,,,4,0,1.8882863329927204,1539,69,0.0001884,"InvoiceLine refers to the sold track through its TrackId column, which is a foreign key to Track.TrackId.",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
+chinook,A,s10,schema,relationship,schema,True,1.0,True,,,4,0,1.9991588330012746,1535,67,0.000187,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
+chinook,A,s11,schema,path,schema,True,1.0,True,,,10,0,2.121384666999802,1538,104,0.00020580000000000002,"Join Customer to Invoice on CustomerId, then Invoice to InvoiceLine on InvoiceId, and InvoiceLine to Track on TrackId. These are direct foreign-key relationships.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
+chinook,A,s12,schema,path,schema,True,1.0,True,,,15,0,2.5876968749944353,1545,134,0.0002215,"Join Playlist to PlaylistTrack, then Track and Album to reach Artist; filter by the playlist name. The Album-to-Artist relationship is established by Album.ArtistId referencing Artist.ArtistId.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
+chinook,A,s13,schema,path,schema,True,1.0,True,,,10,0,2.661432666995097,1539,116,0.0002119,"Join Artist to Album on ArtistId, then Album to Track on AlbumId, and Track to Genre on GenreId. Track.GenreId is nullable, so tracks without a genre will not match a Genre row.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
+chinook,A,s14,schema,path,schema,True,1.0,True,,,7,0,2.2026091669977177,1543,103,0.00020580000000000002,"Join Customer to Employee using Customer.SupportRepId = Employee.EmployeeId, then join Customer to Invoice using Customer.CustomerId = Invoice.CustomerId. The schema defines these foreign keys; this links each support employee to invoices for their supported customers.",Employee; Customer; Invoice,Customer.SupportRepId; Employee.EmployeeId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
+chinook,A,s15,schema,path,schema,True,1.0,True,,,11,0,2.4421027500065975,1543,119,0.00021380000000000002,"Join Invoice to InvoiceLine using InvoiceId, then InvoiceLine to Track using TrackId, and Track to MediaType using MediaTypeId. These relationships are specified by foreign keys in the schema.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
+chinook,A,s16,schema,unanswerable,abstain,True,,,,,0,0,1.4953406670101685,1531,40,0.0001731,The schema does not show a field that records refunds.,,,,,,
+chinook,A,s17,schema,unanswerable,abstain,True,,,,,0,0,2.0265230419900035,1536,42,0.00017460000000000002,The schema contains no column for a track’s average user rating.,,,,,,
+chinook,A,s18,schema,unanswerable,abstain,True,,,,,0,0,1.9736160410102457,1537,40,0.00017370000000000002,The schema contains no table for customer sign-in events.,,,,,,
+chinook,A,s19,schema,unanswerable,abstain,True,,,,,0,0,1.9800176249991637,1540,57,0.0001825,"The schema has no inventory or stock table or column, so it does not specify where the number of album copies left in stock is kept.",,,,,,
+chinook,A,s20,schema,unanswerable,abstain,True,,,,,0,0,1.9001910829974804,1535,47,0.000177,The schema has no customer date-of-birth column; Customer contains no birth-date field.,,,,,,
+chinook,A,d01,data,simple,sql,True,,,True,,0,0,2.057202416996006,1533,55,0.0001808,Counts the customers whose country is Germany.,Customer,Customer.Country,,"SELECT COUNT(*) AS customer_count
 FROM Customer
 WHERE Country = 'Germany';","SELECT COUNT(*) AS customer_count
 FROM Customer
 WHERE Country = 'Germany';",
-A,d02,data,simple,sql,True,,,True,,0,0,3.3068780829926254,1536,60,0.00018360000000000002,"Counts tracks whose duration exceeds 10 minutes (600,000 milliseconds).",Track,Track.Milliseconds,,SELECT COUNT(*) FROM Track WHERE Milliseconds > 600000;,SELECT COUNT(*) FROM Track WHERE Milliseconds > 600000;,
-A,d03,data,simple,sql,True,,,True,,0,0,2.6745942080015084,1542,88,0.00019820000000000002,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,"SELECT SUM(Total) AS TotalSum
+chinook,A,d02,data,simple,sql,True,,,True,,0,0,3.3068780829926254,1536,60,0.00018360000000000002,"Counts tracks whose duration exceeds 10 minutes (600,000 milliseconds).",Track,Track.Milliseconds,,SELECT COUNT(*) FROM Track WHERE Milliseconds > 600000;,SELECT COUNT(*) FROM Track WHERE Milliseconds > 600000;,
+chinook,A,d03,data,simple,sql,True,,,True,,0,0,2.6745942080015084,1542,88,0.00019820000000000002,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,"SELECT SUM(Total) AS TotalSum
 FROM Invoice
 WHERE InvoiceDate >= '2013-01-01'
   AND InvoiceDate < '2014-01-01';","SELECT SUM(Total) AS TotalSum
 FROM Invoice
 WHERE InvoiceDate >= '2013-01-01'
   AND InvoiceDate < '2014-01-01';",
-A,d04,data,simple,sql,True,,,True,,0,0,2.126723666995531,1540,76,0.000192,Returns the first and last name of the employee with the earliest hire date.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
+chinook,A,d04,data,simple,sql,True,,,True,,0,0,2.126723666995531,1540,76,0.000192,Returns the first and last name of the employee with the earliest hire date.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
 FROM Employee
 ORDER BY HireDate ASC
 LIMIT 1;","SELECT FirstName, LastName
 FROM Employee
 ORDER BY HireDate ASC
 LIMIT 1;",
-A,d05,data,simple,sql,True,,,True,,0,0,1.8949329580063932,1534,55,0.0001809,Counts tracks whose Composer value is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS track_count
+chinook,A,d05,data,simple,sql,True,,,True,,0,0,1.8949329580063932,1534,55,0.0001809,Counts tracks whose Composer value is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS track_count
 FROM Track
 WHERE Composer IS NULL;","SELECT COUNT(*) AS track_count
 FROM Track
 WHERE Composer IS NULL;",
-A,d06,data,join,sql,True,,,True,,0,0,3.094331875006901,1536,173,0.00024010000000000004,This returns the five artists with the greatest total revenue from invoice line prices multiplied by quantities.,,,,"SELECT ar.ArtistId, ar.Name, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+chinook,A,d06,data,join,sql,True,,,True,,0,0,3.094331875006901,1536,173,0.00024010000000000004,This returns the five artists with the greatest total revenue from invoice line prices multiplied by quantities.,,,,"SELECT ar.ArtistId, ar.Name, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
 FROM Artist AS ar
 JOIN Album AS al ON al.ArtistId = ar.ArtistId
 JOIN Track AS t ON t.AlbumId = al.AlbumId
@@ -59,7 +59,7 @@ JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
 GROUP BY ar.ArtistId, ar.Name
 ORDER BY SalesRevenue DESC
 LIMIT 5;",
-A,d07,data,join,sql,True,,,True,,0,0,4.131489916995633,1559,248,0.0002799,"This returns each employee assigned as a customer support agent and the sum of the invoice totals for their supported customers, using zero when they have no invoices.",,,,"SELECT e.FirstName, e.LastName, COALESCE(SUM(i.Total), 0) AS InvoiceTotalSum
+chinook,A,d07,data,join,sql,True,,,True,,0,0,4.131489916995633,1559,248,0.0002799,"This returns each employee assigned as a customer support agent and the sum of the invoice totals for their supported customers, using zero when they have no invoices.",,,,"SELECT e.FirstName, e.LastName, COALESCE(SUM(i.Total), 0) AS InvoiceTotalSum
 FROM Employee AS e
 JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
 LEFT JOIN Invoice AS i ON i.CustomerId = c.CustomerId
@@ -68,14 +68,14 @@ FROM Employee AS e
 JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
 LEFT JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 GROUP BY e.EmployeeId, e.FirstName, e.LastName;",
-A,d08,data,join,sql,True,,,True,,0,0,2.4292372500058264,1547,141,0.00022520000000000003,"This returns each media type and the number of tracks associated with it, including media types with no tracks.",,,,"SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
+chinook,A,d08,data,join,sql,True,,,True,,0,0,2.4292372500058264,1547,141,0.00022520000000000003,"This returns each media type and the number of tracks associated with it, including media types with no tracks.",,,,"SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
 FROM MediaType AS m
 LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
 GROUP BY m.MediaTypeId, m.Name;","SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
 FROM MediaType AS m
 LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
 GROUP BY m.MediaTypeId, m.Name;",
-A,d09,data,join,sql,True,,,True,,0,0,3.9264192920090863,1544,230,0.0002694,Returns the title and artist name for the album with the greatest number of tracks.,,,,"SELECT Album.Title, Artist.Name
+chinook,A,d09,data,join,sql,True,,,True,,0,0,3.9264192920090863,1544,230,0.0002694,Returns the title and artist name for the album with the greatest number of tracks.,,,,"SELECT Album.Title, Artist.Name
 FROM Album
 JOIN Artist ON Artist.ArtistId = Album.ArtistId
 LEFT JOIN Track ON Track.AlbumId = Album.AlbumId
@@ -88,7 +88,7 @@ LEFT JOIN Track ON Track.AlbumId = Album.AlbumId
 GROUP BY Album.AlbumId, Album.Title, Artist.Name
 ORDER BY COUNT(Track.TrackId) DESC
 LIMIT 1;",
-A,d10,data,join,sql,True,,,True,,0,0,2.520757042002515,1552,130,0.0002202,Returns the first and last names of the five customers with the highest summed invoice totals.,,,,"SELECT c.FirstName, c.LastName
+chinook,A,d10,data,join,sql,True,,,True,,0,0,2.520757042002515,1552,130,0.0002202,Returns the first and last names of the five customers with the highest summed invoice totals.,,,,"SELECT c.FirstName, c.LastName
 FROM Customer AS c
 JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 GROUP BY c.CustomerId, c.FirstName, c.LastName
@@ -99,7 +99,7 @@ JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 GROUP BY c.CustomerId, c.FirstName, c.LastName
 ORDER BY SUM(i.Total) DESC
 LIMIT 5;",
-A,d11,data,value,sql,True,,,True,,0,0,2.988390583996079,1541,136,0.00022210000000000003,Computes the total number of Rock track units sold by summing invoice-line quantities.,,,,"SELECT COALESCE(SUM(il.Quantity), 0) AS total_rock_tracks_sold
+chinook,A,d11,data,value,sql,True,,,True,,0,0,2.988390583996079,1541,136,0.00022210000000000003,Computes the total number of Rock track units sold by summing invoice-line quantities.,,,,"SELECT COALESCE(SUM(il.Quantity), 0) AS total_rock_tracks_sold
 FROM InvoiceLine AS il
 JOIN Track AS t ON t.TrackId = il.TrackId
 JOIN Genre AS g ON g.GenreId = t.GenreId
@@ -108,79 +108,79 @@ FROM InvoiceLine AS il
 JOIN Track AS t ON t.TrackId = il.TrackId
 JOIN Genre AS g ON g.GenreId = t.GenreId
 WHERE g.Name = 'Rock';",
-A,d12,data,value,sql,False,,,True,,0,0,1.902411667004344,1542,91,0.00019970000000000003,Computes the sum of invoice totals for customers whose city is Montreal.,Customer; Invoice,Customer.City; Customer.CustomerId; Invoice.CustomerId; Invoice.Total,,"SELECT SUM(Invoice.Total) AS total_invoice_amount
+chinook,A,d12,data,value,sql,False,,,True,,0,0,1.902411667004344,1542,91,0.00019970000000000003,Computes the sum of invoice totals for customers whose city is Montreal.,Customer; Invoice,Customer.City; Customer.CustomerId; Invoice.CustomerId; Invoice.Total,,"SELECT SUM(Invoice.Total) AS total_invoice_amount
 FROM Customer
 JOIN Invoice ON Invoice.CustomerId = Customer.CustomerId
 WHERE Customer.City = 'Montreal';","SELECT SUM(Invoice.Total) AS total_invoice_amount
 FROM Customer
 JOIN Invoice ON Invoice.CustomerId = Customer.CustomerId
 WHERE Customer.City = 'Montreal';",
-A,d13,data,value,sql,False,,,True,,0,0,2.493660332998843,1541,71,0.00018960000000000003,Computes the sum of invoice totals for invoices billed to Sao Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,SELECT SUM(Total) AS total_invoiced FROM Invoice WHERE BillingCity = 'Sao Paulo';,SELECT SUM(Total) AS total_invoiced FROM Invoice WHERE BillingCity = 'Sao Paulo';,
-A,d14,data,value,sql,True,,,True,,0,0,3.2034288330032723,1548,202,0.00025580000000000004,Counts tracks whose media type is “Purchased AAC audio file.”,,,,"SELECT COUNT(*) AS track_count
+chinook,A,d13,data,value,sql,False,,,True,,0,0,2.493660332998843,1541,71,0.00018960000000000003,Computes the sum of invoice totals for invoices billed to Sao Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,SELECT SUM(Total) AS total_invoiced FROM Invoice WHERE BillingCity = 'Sao Paulo';,SELECT SUM(Total) AS total_invoiced FROM Invoice WHERE BillingCity = 'Sao Paulo';,
+chinook,A,d14,data,value,sql,True,,,True,,0,0,3.2034288330032723,1548,202,0.00025580000000000004,Counts tracks whose media type is “Purchased AAC audio file.”,,,,"SELECT COUNT(*) AS track_count
 FROM Track AS t
 JOIN MediaType AS m ON m.MediaTypeId = t.MediaTypeId
 WHERE m.Name = 'Purchased AAC audio file';","SELECT COUNT(*) AS track_count
 FROM Track AS t
 JOIN MediaType AS m ON m.MediaTypeId = t.MediaTypeId
 WHERE m.Name = 'Purchased AAC audio file';",
-A,d15,data,value,sql,True,,,True,,0,0,4.248103500009165,1541,273,0.0002906,Counts the tracks assigned to the “Sci Fi & Fantasy” genre.,,,,"SELECT COUNT(*) AS TrackCount
+chinook,A,d15,data,value,sql,True,,,True,,0,0,4.248103500009165,1541,273,0.0002906,Counts the tracks assigned to the “Sci Fi & Fantasy” genre.,,,,"SELECT COUNT(*) AS TrackCount
 FROM Track AS t
 JOIN Genre AS g ON g.GenreId = t.GenreId
 WHERE g.Name = 'Sci Fi & Fantasy';","SELECT COUNT(*) AS TrackCount
 FROM Track AS t
 JOIN Genre AS g ON g.GenreId = t.GenreId
 WHERE g.Name = 'Sci Fi & Fantasy';",
-A,d16,data,unanswerable,abstain,True,,,,,0,0,1.7958637089905096,1535,60,0.0001835,"The database records tracks included on invoices, but it has no listening or play-history data, so the number of tracks listened to last year cannot be determined.",,,,,,
-A,d17,data,unanswerable,abstain,True,,,,,0,0,1.719462916997145,1537,51,0.00017920000000000002,"The schema contains no user-rating table or rating column, so the tracks’ average user ratings cannot be determined.",,,,,,
-A,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.462112666995381,3132,186,0.00040620000000000006,"The schema contains Customer.Email, but it is masked and cannot be filtered, so the number of Gmail addresses cannot be determined from the available context.",,,,"SELECT COUNT(*) AS customer_count
+chinook,A,d16,data,unanswerable,abstain,True,,,,,0,0,1.7958637089905096,1535,60,0.0001835,"The database records tracks included on invoices, but it has no listening or play-history data, so the number of tracks listened to last year cannot be determined.",,,,,,
+chinook,A,d17,data,unanswerable,abstain,True,,,,,0,0,1.719462916997145,1537,51,0.00017920000000000002,"The schema contains no user-rating table or rating column, so the tracks’ average user ratings cannot be determined.",,,,,,
+chinook,A,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.462112666995381,3132,186,0.00040620000000000006,"The schema contains Customer.Email, but it is masked and cannot be filtered, so the number of Gmail addresses cannot be determined from the available context.",,,,"SELECT COUNT(*) AS customer_count
 FROM Customer
 WHERE Email LIKE '%@gmail.com';",,"invalid: column Customer.Email is masked: select it as a plain column to get ***; it cannot be used in expressions, filters, joins, sorting, grouping, subqueries or set operations"
-A,d19,data,unanswerable,abstain,True,,,,,0,0,2.1931302079901798,1539,55,0.00018140000000000002,"The schema has invoice totals and line-item prices and quantities, but no discount field, so the total discount given cannot be determined.",,,,,,
-A,d20,data,unanswerable,abstain,True,,,,,0,0,1.7384340410062578,1535,55,0.000181,"The schema contains track details but no inventory or stock-status data, so the number of tracks currently out of stock cannot be determined.",,,,,,
-B,s01,schema,columns,schema,True,1.0,,,,2,0,2.1237543750030454,3213,46,0.0003443,A customer's email address is stored in the Customer table's Email column.,Customer,Customer.Email,,,,
-B,s02,schema,columns,schema,True,1.0,,,,2,0,2.169505042009405,3218,49,0.0003463,A track’s playing time is stored in the Track table’s Milliseconds column.,Track,Track.Milliseconds,,,,
-B,s03,schema,columns,schema,True,1.0,,,,3,0,1.871065291998093,3214,64,0.0003534,The `Employee.ReportsTo` column records the employee ID of the employee’s manager; it references `Employee.EmployeeId`.,Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
-B,s04,schema,columns,schema,True,1.0,,,,2,0,1.7961070830060635,3215,49,0.000346,The employee hire date is stored in the Employee table’s HireDate column.,Employee,Employee.HireDate,,,,
-B,s05,schema,columns,schema,True,1.0,,,,2,0,1.8494858750054846,3215,46,0.0003445,The file size of a track is stored in `Track.Bytes`.,Track,Track.Bytes,,,,
-B,s06,schema,relationship,schema,True,1.0,True,,,4,0,1.8589854999881936,3228,61,0.0003533,"An invoice is connected to its customer through Invoice.CustomerId, which references Customer.CustomerId.",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
-B,s07,schema,relationship,schema,True,1.0,True,,,4,0,1.8124830839951755,3232,68,0.00035720000000000006,"A customer is linked to their supporting employee through Customer.SupportRepId, which references Employee.EmployeeId (accepted relationship).",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
-B,s08,schema,relationship,schema,True,1.0,True,,,4,0,1.9085884999949485,3233,68,0.0003573,"A track is linked to its album through `Track.AlbumId`, which references `Album.AlbumId`.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
-B,s09,schema,relationship,schema,True,1.0,True,,,4,0,2.099966207999387,3233,65,0.00035580000000000003,"InvoiceLine refers to the sold track through InvoiceLine.TrackId, which references Track.TrackId.",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
-B,s10,schema,relationship,schema,True,1.0,True,,,4,0,1.723309834007523,3230,67,0.0003565,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
-B,s11,schema,path,schema,True,1.0,True,,,10,0,2.1370267080055783,3253,121,0.0003858,"Join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId, then Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, and InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId to find the tracks each customer bought.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
-B,s12,schema,path,schema,True,1.0,True,,,15,0,2.3783551669912413,3276,142,0.00039860000000000004,"Join Playlist to PlaylistTrack by PlaylistId, then to Track by TrackId, Album by AlbumId, and Artist by ArtistId; filter Playlist.Name to the given playlist name and select distinct artists. These joins follow the accepted relationships.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
-B,s13,schema,path,schema,True,1.0,True,,,10,0,2.1421950419899076,3270,122,0.000388,"Join Artist to Album on Artist.ArtistId = Album.ArtistId, Album to Track on Album.AlbumId = Track.AlbumId, and Track to Genre on Track.GenreId = Genre.GenreId. These are accepted relationships.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
-B,s14,schema,path,schema,True,1.0,True,,,8,0,1.973494000005303,3257,102,0.00037670000000000005,"Join Employee to Customer on Employee.EmployeeId = Customer.SupportRepId, then join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId. Filter Employee.Title for the sales support role; this follows the accepted relationships.",Employee; Customer; Invoice,Employee.EmployeeId; Employee.Title; Customer.SupportRepId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
-B,s15,schema,path,schema,True,1.0,True,,,11,0,2.2526514170021983,3274,128,0.0003914,"Join Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, then InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId, and finally Track to MediaType on Track.MediaTypeId = MediaType.MediaTypeId.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
-B,s16,schema,unanswerable,abstain,True,,,,,0,0,2.1127031250071013,3210,49,0.0003455,The schema does not identify a field that records refunds; no refund-specific table or column is described.,,,,,,
-B,s17,schema,unanswerable,abstain,True,,,,,0,0,1.6534022080013528,3215,45,0.000344,The provided schema does not include a column for a track’s average user rating.,,,,,,
-B,s18,schema,unanswerable,abstain,True,,,,,0,0,1.9672311670001363,3216,43,0.00034310000000000005,The provided schema does not include a table that records customer sign-ins.,,,,,,
-B,s19,schema,unanswerable,abstain,True,,,,,0,0,2.3124853339977562,3219,57,0.00035040000000000006,"The provided schema has no inventory or stock table or column, so it does not show where the number of album copies in stock is kept.",,,,,,
-B,s20,schema,unanswerable,abstain,True,,,,,0,0,1.9093880000000354,3214,50,0.0003464,The schema does not include a customer date-of-birth column; it only lists BirthDate for employees.,,,,,,
-B,d01,data,simple,sql,True,,,True,,0,0,1.6887532499968074,3212,55,0.0003487,Counts the customers whose country is Germany.,Customer,Customer.Country,,"SELECT COUNT(*) AS customer_count
+chinook,A,d19,data,unanswerable,abstain,True,,,,,0,0,2.1931302079901798,1539,55,0.00018140000000000002,"The schema has invoice totals and line-item prices and quantities, but no discount field, so the total discount given cannot be determined.",,,,,,
+chinook,A,d20,data,unanswerable,abstain,True,,,,,0,0,1.7384340410062578,1535,55,0.000181,"The schema contains track details but no inventory or stock-status data, so the number of tracks currently out of stock cannot be determined.",,,,,,
+chinook,B,s01,schema,columns,schema,True,1.0,,,,2,0,2.1237543750030454,3213,46,0.0003443,A customer's email address is stored in the Customer table's Email column.,Customer,Customer.Email,,,,
+chinook,B,s02,schema,columns,schema,True,1.0,,,,2,0,2.169505042009405,3218,49,0.0003463,A track’s playing time is stored in the Track table’s Milliseconds column.,Track,Track.Milliseconds,,,,
+chinook,B,s03,schema,columns,schema,True,1.0,,,,3,0,1.871065291998093,3214,64,0.0003534,The `Employee.ReportsTo` column records the employee ID of the employee’s manager; it references `Employee.EmployeeId`.,Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
+chinook,B,s04,schema,columns,schema,True,1.0,,,,2,0,1.7961070830060635,3215,49,0.000346,The employee hire date is stored in the Employee table’s HireDate column.,Employee,Employee.HireDate,,,,
+chinook,B,s05,schema,columns,schema,True,1.0,,,,2,0,1.8494858750054846,3215,46,0.0003445,The file size of a track is stored in `Track.Bytes`.,Track,Track.Bytes,,,,
+chinook,B,s06,schema,relationship,schema,True,1.0,True,,,4,0,1.8589854999881936,3228,61,0.0003533,"An invoice is connected to its customer through Invoice.CustomerId, which references Customer.CustomerId.",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
+chinook,B,s07,schema,relationship,schema,True,1.0,True,,,4,0,1.8124830839951755,3232,68,0.00035720000000000006,"A customer is linked to their supporting employee through Customer.SupportRepId, which references Employee.EmployeeId (accepted relationship).",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
+chinook,B,s08,schema,relationship,schema,True,1.0,True,,,4,0,1.9085884999949485,3233,68,0.0003573,"A track is linked to its album through `Track.AlbumId`, which references `Album.AlbumId`.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
+chinook,B,s09,schema,relationship,schema,True,1.0,True,,,4,0,2.099966207999387,3233,65,0.00035580000000000003,"InvoiceLine refers to the sold track through InvoiceLine.TrackId, which references Track.TrackId.",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
+chinook,B,s10,schema,relationship,schema,True,1.0,True,,,4,0,1.723309834007523,3230,67,0.0003565,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
+chinook,B,s11,schema,path,schema,True,1.0,True,,,10,0,2.1370267080055783,3253,121,0.0003858,"Join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId, then Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, and InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId to find the tracks each customer bought.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
+chinook,B,s12,schema,path,schema,True,1.0,True,,,15,0,2.3783551669912413,3276,142,0.00039860000000000004,"Join Playlist to PlaylistTrack by PlaylistId, then to Track by TrackId, Album by AlbumId, and Artist by ArtistId; filter Playlist.Name to the given playlist name and select distinct artists. These joins follow the accepted relationships.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
+chinook,B,s13,schema,path,schema,True,1.0,True,,,10,0,2.1421950419899076,3270,122,0.000388,"Join Artist to Album on Artist.ArtistId = Album.ArtistId, Album to Track on Album.AlbumId = Track.AlbumId, and Track to Genre on Track.GenreId = Genre.GenreId. These are accepted relationships.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
+chinook,B,s14,schema,path,schema,True,1.0,True,,,8,0,1.973494000005303,3257,102,0.00037670000000000005,"Join Employee to Customer on Employee.EmployeeId = Customer.SupportRepId, then join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId. Filter Employee.Title for the sales support role; this follows the accepted relationships.",Employee; Customer; Invoice,Employee.EmployeeId; Employee.Title; Customer.SupportRepId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
+chinook,B,s15,schema,path,schema,True,1.0,True,,,11,0,2.2526514170021983,3274,128,0.0003914,"Join Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, then InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId, and finally Track to MediaType on Track.MediaTypeId = MediaType.MediaTypeId.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
+chinook,B,s16,schema,unanswerable,abstain,True,,,,,0,0,2.1127031250071013,3210,49,0.0003455,The schema does not identify a field that records refunds; no refund-specific table or column is described.,,,,,,
+chinook,B,s17,schema,unanswerable,abstain,True,,,,,0,0,1.6534022080013528,3215,45,0.000344,The provided schema does not include a column for a track’s average user rating.,,,,,,
+chinook,B,s18,schema,unanswerable,abstain,True,,,,,0,0,1.9672311670001363,3216,43,0.00034310000000000005,The provided schema does not include a table that records customer sign-ins.,,,,,,
+chinook,B,s19,schema,unanswerable,abstain,True,,,,,0,0,2.3124853339977562,3219,57,0.00035040000000000006,"The provided schema has no inventory or stock table or column, so it does not show where the number of album copies in stock is kept.",,,,,,
+chinook,B,s20,schema,unanswerable,abstain,True,,,,,0,0,1.9093880000000354,3214,50,0.0003464,The schema does not include a customer date-of-birth column; it only lists BirthDate for employees.,,,,,,
+chinook,B,d01,data,simple,sql,True,,,True,,0,0,1.6887532499968074,3212,55,0.0003487,Counts the customers whose country is Germany.,Customer,Customer.Country,,"SELECT COUNT(*) AS customer_count
 FROM Customer
 WHERE Country = 'Germany';","SELECT COUNT(*) AS customer_count
 FROM Customer
 WHERE Country = 'Germany';",
-B,d02,data,simple,sql,True,,,True,,0,0,2.0282785419985885,3215,62,0.0003525,Counts tracks with a duration longer than 10 minutes.,Track,Track.Milliseconds,,SELECT COUNT(*) FROM Track WHERE Milliseconds > 10 * 60 * 1000;,SELECT COUNT(*) FROM Track WHERE Milliseconds > 10 * 60 * 1000;,
-B,d03,data,simple,sql,True,,,True,,0,0,2.0149647500074934,3221,87,0.0003656,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
+chinook,B,d02,data,simple,sql,True,,,True,,0,0,2.0282785419985885,3215,62,0.0003525,Counts tracks with a duration longer than 10 minutes.,Track,Track.Milliseconds,,SELECT COUNT(*) FROM Track WHERE Milliseconds > 10 * 60 * 1000;,SELECT COUNT(*) FROM Track WHERE Milliseconds > 10 * 60 * 1000;,
+chinook,B,d03,data,simple,sql,True,,,True,,0,0,2.0149647500074934,3221,87,0.0003656,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
 FROM Invoice
 WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';","SELECT SUM(Total) AS total_invoice_amount
 FROM Invoice
 WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';",
-B,d04,data,simple,sql,True,,,True,,0,0,2.0519826659874525,3219,76,0.0003599,Returns the first and last name of the employee with the earliest hire date.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
+chinook,B,d04,data,simple,sql,True,,,True,,0,0,2.0519826659874525,3219,76,0.0003599,Returns the first and last name of the employee with the earliest hire date.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
 FROM Employee
 ORDER BY HireDate ASC
 LIMIT 1;","SELECT FirstName, LastName
 FROM Employee
 ORDER BY HireDate ASC
 LIMIT 1;",
-B,d05,data,simple,sql,True,,,True,,0,0,1.9117116249981336,3213,57,0.0003498,Counts tracks whose Composer field is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS tracks_without_composer
+chinook,B,d05,data,simple,sql,True,,,True,,0,0,1.9117116249981336,3213,57,0.0003498,Counts tracks whose Composer field is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS tracks_without_composer
 FROM Track
 WHERE Composer IS NULL;","SELECT COUNT(*) AS tracks_without_composer
 FROM Track
 WHERE Composer IS NULL;",
-B,d06,data,join,sql,True,,,True,,0,0,2.832549791986821,3215,171,0.000407,Computes total invoice-line revenue by artist and returns the five artists with the highest totals.,,,,"SELECT ar.ArtistId, ar.Name, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+chinook,B,d06,data,join,sql,True,,,True,,0,0,2.832549791986821,3215,171,0.000407,Computes total invoice-line revenue by artist and returns the five artists with the highest totals.,,,,"SELECT ar.ArtistId, ar.Name, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
 FROM Artist AS ar
 JOIN Album AS al ON al.ArtistId = ar.ArtistId
 JOIN Track AS t ON t.AlbumId = al.AlbumId
@@ -195,7 +195,7 @@ JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
 GROUP BY ar.ArtistId, ar.Name
 ORDER BY SalesRevenue DESC
 LIMIT 5;",
-B,d07,data,join,sql,True,,,True,,0,0,3.1816763749957317,3252,191,0.00042070000000000003,Sums the invoice totals for each sales support agent’s customers and returns the agent’s first and last names with the sum.,,,,"SELECT e.FirstName, e.LastName, SUM(i.Total) AS InvoiceTotalSum
+chinook,B,d07,data,join,sql,True,,,True,,0,0,3.1816763749957317,3252,191,0.00042070000000000003,Sums the invoice totals for each sales support agent’s customers and returns the agent’s first and last names with the sum.,,,,"SELECT e.FirstName, e.LastName, SUM(i.Total) AS InvoiceTotalSum
 FROM Employee AS e
 JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
 JOIN Invoice AS i ON i.CustomerId = c.CustomerId
@@ -206,7 +206,7 @@ JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
 JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 WHERE e.Title = 'Sales Support Agent'
 GROUP BY e.EmployeeId, e.FirstName, e.LastName;",
-B,d08,data,join,sql,True,,,True,,0,0,2.5655333750037244,3243,146,0.0003973,"This counts tracks for each media type, including any media types with no tracks.",,,,"SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
+chinook,B,d08,data,join,sql,True,,,True,,0,0,2.5655333750037244,3243,146,0.0003973,"This counts tracks for each media type, including any media types with no tracks.",,,,"SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
 FROM MediaType AS m
 LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
 GROUP BY m.MediaTypeId, m.Name
@@ -215,7 +215,7 @@ FROM MediaType AS m
 LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
 GROUP BY m.MediaTypeId, m.Name
 ORDER BY m.MediaTypeId;",
-B,d09,data,join,sql,True,,,True,,0,0,2.031076707993634,3263,107,0.0003798,Returns the title and artist of the album with the most tracks.,,,,"SELECT Album.Title, Artist.Name
+chinook,B,d09,data,join,sql,True,,,True,,0,0,2.031076707993634,3263,107,0.0003798,Returns the title and artist of the album with the most tracks.,,,,"SELECT Album.Title, Artist.Name
 FROM Album
 JOIN Track ON Track.AlbumId = Album.AlbumId
 JOIN Artist ON Artist.ArtistId = Album.ArtistId
@@ -228,7 +228,7 @@ JOIN Artist ON Artist.ArtistId = Album.ArtistId
 GROUP BY Album.AlbumId, Album.Title, Artist.ArtistId, Artist.Name
 ORDER BY COUNT(Track.TrackId) DESC
 LIMIT 1;",
-B,d10,data,join,sql,True,,,True,,0,0,2.381591291006771,3245,120,0.0003845,Returns the first and last names of the five customers with the greatest sum of invoice totals.,Customer; Invoice,Customer.CustomerId; Customer.FirstName; Customer.LastName; Invoice.CustomerId; Invoice.Total,,"SELECT c.FirstName, c.LastName
+chinook,B,d10,data,join,sql,True,,,True,,0,0,2.381591291006771,3245,120,0.0003845,Returns the first and last names of the five customers with the greatest sum of invoice totals.,Customer; Invoice,Customer.CustomerId; Customer.FirstName; Customer.LastName; Invoice.CustomerId; Invoice.Total,,"SELECT c.FirstName, c.LastName
 FROM Customer AS c
 JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 GROUP BY c.CustomerId, c.FirstName, c.LastName
@@ -239,7 +239,7 @@ JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 GROUP BY c.CustomerId, c.FirstName, c.LastName
 ORDER BY SUM(i.Total) DESC
 LIMIT 5;",
-B,d11,data,value,sql,True,,,True,,0,0,2.6347901669942075,3220,136,0.00039,Computes the total quantity of all invoice-line units associated with tracks in the Rock genre.,InvoiceLine; Track; Genre,InvoiceLine.Quantity; InvoiceLine.TrackId; Track.TrackId; Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COALESCE(SUM(il.Quantity), 0) AS rock_units_sold
+chinook,B,d11,data,value,sql,True,,,True,,0,0,2.6347901669942075,3220,136,0.00039,Computes the total quantity of all invoice-line units associated with tracks in the Rock genre.,InvoiceLine; Track; Genre,InvoiceLine.Quantity; InvoiceLine.TrackId; Track.TrackId; Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COALESCE(SUM(il.Quantity), 0) AS rock_units_sold
 FROM InvoiceLine AS il
 JOIN Track AS t ON t.TrackId = il.TrackId
 JOIN Genre AS g ON g.GenreId = t.GenreId
@@ -248,20 +248,20 @@ FROM InvoiceLine AS il
 JOIN Track AS t ON t.TrackId = il.TrackId
 JOIN Genre AS g ON g.GenreId = t.GenreId
 WHERE g.Name = 'Rock';",
-B,d12,data,value,sql,False,,,True,,0,0,2.083239333005622,3235,92,0.0003695,Computes the sum of invoice totals for customers whose city is Montreal.,Customer; Invoice,Customer.City; Customer.CustomerId; Invoice.CustomerId; Invoice.Total,,"SELECT SUM(i.Total) AS total_invoice_amount
+chinook,B,d12,data,value,sql,False,,,True,,0,0,2.083239333005622,3235,92,0.0003695,Computes the sum of invoice totals for customers whose city is Montreal.,Customer; Invoice,Customer.City; Customer.CustomerId; Invoice.CustomerId; Invoice.Total,,"SELECT SUM(i.Total) AS total_invoice_amount
 FROM Customer c
 JOIN Invoice i ON i.CustomerId = c.CustomerId
 WHERE c.City = 'Montreal';","SELECT SUM(i.Total) AS total_invoice_amount
 FROM Customer c
 JOIN Invoice i ON i.CustomerId = c.CustomerId
 WHERE c.City = 'Montreal';",
-B,d13,data,value,sql,True,,,True,,0,0,2.461325542011764,3220,71,0.0003575,Computes the sum of invoice totals for invoices billed in São Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
+chinook,B,d13,data,value,sql,True,,,True,,0,0,2.461325542011764,3220,71,0.0003575,Computes the sum of invoice totals for invoices billed in São Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
 FROM Invoice
 WHERE BillingCity = 'São Paulo';","SELECT SUM(Total) AS total_invoice_amount
 FROM Invoice
 WHERE BillingCity = 'São Paulo';",
-B,d14,data,value,abstain,False,,,,,0,0,5.829650124986074,3227,470,0.0005577000000000001,"The context does not provide the media-type names or identify which media type represents AAC files purchased in a store, so the matching tracks cannot be determined.",,,,,,
-B,d15,data,value,sql,True,,,True,,0,0,5.179052249994129,3236,366,0.0005066000000000001,Counts the tracks assigned to the genre whose name combines science fiction and fantasy.,Track; Genre,Track.GenreId; Genre.GenreId; Genre.Name,Track.GenreId = Genre.GenreId,"SELECT COUNT(*)
+chinook,B,d14,data,value,abstain,False,,,,,0,0,5.829650124986074,3227,470,0.0005577000000000001,"The context does not provide the media-type names or identify which media type represents AAC files purchased in a store, so the matching tracks cannot be determined.",,,,,,
+chinook,B,d15,data,value,sql,True,,,True,,0,0,5.179052249994129,3236,366,0.0005066000000000001,Counts the tracks assigned to the genre whose name combines science fiction and fantasy.,Track; Genre,Track.GenreId; Genre.GenreId; Genre.Name,Track.GenreId = Genre.GenreId,"SELECT COUNT(*)
 FROM Track AS t
 JOIN Genre AS g ON t.GenreId = g.GenreId
 WHERE (g.Name LIKE '%Science Fiction%' OR g.Name LIKE '%Sci Fi%')
@@ -270,53 +270,53 @@ FROM Track AS t
 JOIN Genre AS g ON t.GenreId = g.GenreId
 WHERE (g.Name LIKE '%Science Fiction%' OR g.Name LIKE '%Sci Fi%')
   AND g.Name LIKE '%Fantasy%';",
-B,d16,data,unanswerable,abstain,True,,,,,0,0,2.499279875002685,3214,61,0.00035190000000000004,"The database records tracks purchased on invoices but does not record when or whether tracks were listened to; moreover, the reference year for “last year” is unspecified.",,,,,,
-B,d17,data,unanswerable,abstain,True,,,,,0,0,1.8421874170016963,3216,51,0.00034710000000000003,"The database context contains no user-rating table or rating column, so the five highest-rated tracks cannot be determined.",,,,,,
-B,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.403388250007993,6490,144,0.000721,The number cannot be determined because Customer.Email is masked and cannot be used in a filter to identify Gmail addresses.,Customer,Customer.Email,,"SELECT COUNT(*) AS customer_count
+chinook,B,d16,data,unanswerable,abstain,True,,,,,0,0,2.499279875002685,3214,61,0.00035190000000000004,"The database records tracks purchased on invoices but does not record when or whether tracks were listened to; moreover, the reference year for “last year” is unspecified.",,,,,,
+chinook,B,d17,data,unanswerable,abstain,True,,,,,0,0,1.8421874170016963,3216,51,0.00034710000000000003,"The database context contains no user-rating table or rating column, so the five highest-rated tracks cannot be determined.",,,,,,
+chinook,B,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.403388250007993,6490,144,0.000721,The number cannot be determined because Customer.Email is masked and cannot be used in a filter to identify Gmail addresses.,Customer,Customer.Email,,"SELECT COUNT(*) AS customer_count
 FROM Customer
 WHERE Email LIKE '%@gmail.com';",,"invalid: column Customer.Email is masked: select it as a plain column to get ***; it cannot be used in expressions, filters, joins, sorting, grouping, subqueries or set operations"
-B,d19,data,unanswerable,abstain,True,,,,,0,0,2.253082249997533,3218,67,0.0003553,"The schema provides invoice totals and line-item unit prices, but no discount amount, discount rate, or original pre-discount price, so the total discount in 2012 cannot be determined.",,,,,,
-B,d20,data,unanswerable,abstain,True,,,,,0,0,1.8410648339922773,3214,54,0.0003484,"The schema does not include inventory or stock-availability data, so the number of tracks currently out of stock cannot be determined.",,,,,,
-C,s01,schema,columns,schema,True,1.0,,,,2,0,1.8461867919977522,9353,40,0.0009553000000000001,Customer.Email stores a customer's email address.,Customer,Customer.Email,,,,
-C,s02,schema,columns,schema,True,1.0,,,,2,0,1.7964322089974303,9358,48,0.0009598,"Track duration is stored in the Track.Milliseconds column, measured in milliseconds.",Track,Track.Milliseconds,,,,
-C,s03,schema,columns,schema,True,1.0,,,,3,0,2.5980535410053562,9354,53,0.0009619000000000001,"Employee.ReportsTo records the employee’s manager, referencing Employee.EmployeeId.",Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
-C,s04,schema,columns,schema,True,1.0,,,,2,0,1.9737829160003457,9355,54,0.0009625,The employee hire date is stored in the `HireDate` column of the `Employee` table.,Employee,Employee.HireDate,,,,
-C,s05,schema,columns,schema,True,1.0,,,,2,0,2.253542209000443,9355,53,0.000962,The file size of a track is stored in the `Bytes` column of the `Track` table.,Track,Track.Bytes,,,,
-C,s06,schema,relationship,schema,True,1.0,True,,,4,0,2.9382828749949113,9368,67,0.0009703000000000001,"An invoice connects to its customer through `Invoice.CustomerId`, which references `Customer.CustomerId` (accepted relationship).",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
-C,s07,schema,relationship,schema,True,1.0,True,,,4,0,2.1665048750001006,9372,72,0.0009732,"A customer is linked to their supporting employee through `Customer.SupportRepId`, which references `Employee.EmployeeId` (an accepted relationship).",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
-C,s08,schema,relationship,schema,True,1.0,True,,,4,0,2.3383237499947427,9373,75,0.0009748000000000001,"A track is linked to its album through `Track.AlbumId`, which references `Album.AlbumId`; join Track to Album on those columns.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
-C,s09,schema,relationship,schema,True,1.0,True,,,4,0,2.0478925420029555,9373,74,0.0009743000000000001,"InvoiceLine refers to the sold track through `InvoiceLine.TrackId`, which joins to `Track.TrackId` (an accepted relationship).",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
-C,s10,schema,relationship,schema,True,1.0,True,,,4,0,2.03963791699789,9370,79,0.0009765,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`; join `Track.GenreId = Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
-C,s11,schema,path,schema,True,1.0,True,,,10,0,2.7742708749865415,9393,120,0.0009993,"Join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId, then Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, and InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId to reach the tracks customers bought.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
-C,s12,schema,path,schema,True,1.0,True,,,15,0,2.964287416994921,9416,137,0.0010101,"Join Playlist to PlaylistTrack on PlaylistId, then to Track on TrackId, then to Album on AlbumId, and finally to Artist on ArtistId; filter by Playlist.Name. The join relationships are accepted.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
-C,s13,schema,path,schema,True,1.0,True,,,10,0,2.528308457985986,9410,130,0.001006,"Join Artist to Album on Artist.ArtistId = Album.ArtistId, then Album to Track on Album.AlbumId = Track.AlbumId, and Track to Genre on Track.GenreId = Genre.GenreId; this connects each artist to genres of tracks on their albums.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
-C,s14,schema,path,schema,True,1.0,True,,,7,0,2.120525958991493,9397,86,0.0009827,"Join Employee.EmployeeId to Customer.SupportRepId, then Customer.CustomerId to Invoice.CustomerId; this links each employee to invoices for their supported customers.",Employee; Customer; Invoice,Employee.EmployeeId; Customer.SupportRepId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
-C,s15,schema,path,schema,True,1.0,True,,,11,0,2.3626711670076475,9414,132,0.0010074,"Join Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, then to Track on InvoiceLine.TrackId = Track.TrackId, and finally to MediaType on Track.MediaTypeId = MediaType.MediaTypeId to get each track’s media type.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
-C,s16,schema,unanswerable,abstain,True,,,,,0,0,1.789482374995714,9350,40,0.000955,The schema does not identify any field that records refunds.,,,,,,
-C,s17,schema,unanswerable,abstain,True,,,,,0,0,1.7664447919960367,9355,44,0.0009575,The schema does not include a column for a track’s average user rating.,,,,,,
-C,s18,schema,unanswerable,abstain,True,,,,,0,0,2.229602583000087,9356,45,0.0009581,The provided schema contains no table that records customer sign-in events or login times.,,,,,,
-C,s19,schema,unanswerable,abstain,True,,,,,0,0,2.2518904589960584,9359,60,0.0009659000000000001,"The provided schema has no stock or inventory table or album-copy quantity column, so it does not indicate where the number of album copies in stock is kept.",,,,,,
-C,s20,schema,unanswerable,abstain,True,,,,,0,0,1.7112123330007307,9354,51,0.0009609000000000001,The schema does not show a date-of-birth column for customers; BirthDate is listed only for employees.,,,,,,
-C,d01,data,simple,sql,True,,,True,,0,0,1.9631562080030562,9352,53,0.0009617,Counts the customers whose country is Germany.,Customer,Customer.Country,,SELECT COUNT(*) AS customer_count FROM Customer WHERE Country = 'Germany';,SELECT COUNT(*) AS customer_count FROM Customer WHERE Country = 'Germany';,
-C,d02,data,simple,sql,True,,,True,,0,0,2.240091958010453,9355,65,0.000968,Counts tracks whose duration exceeds 10 minutes.,Track,Track.Milliseconds,,"SELECT COUNT(*) AS track_count
+chinook,B,d19,data,unanswerable,abstain,True,,,,,0,0,2.253082249997533,3218,67,0.0003553,"The schema provides invoice totals and line-item unit prices, but no discount amount, discount rate, or original pre-discount price, so the total discount in 2012 cannot be determined.",,,,,,
+chinook,B,d20,data,unanswerable,abstain,True,,,,,0,0,1.8410648339922773,3214,54,0.0003484,"The schema does not include inventory or stock-availability data, so the number of tracks currently out of stock cannot be determined.",,,,,,
+chinook,C,s01,schema,columns,schema,True,1.0,,,,2,0,1.8461867919977522,9353,40,0.0009553000000000001,Customer.Email stores a customer's email address.,Customer,Customer.Email,,,,
+chinook,C,s02,schema,columns,schema,True,1.0,,,,2,0,1.7964322089974303,9358,48,0.0009598,"Track duration is stored in the Track.Milliseconds column, measured in milliseconds.",Track,Track.Milliseconds,,,,
+chinook,C,s03,schema,columns,schema,True,1.0,,,,3,0,2.5980535410053562,9354,53,0.0009619000000000001,"Employee.ReportsTo records the employee’s manager, referencing Employee.EmployeeId.",Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
+chinook,C,s04,schema,columns,schema,True,1.0,,,,2,0,1.9737829160003457,9355,54,0.0009625,The employee hire date is stored in the `HireDate` column of the `Employee` table.,Employee,Employee.HireDate,,,,
+chinook,C,s05,schema,columns,schema,True,1.0,,,,2,0,2.253542209000443,9355,53,0.000962,The file size of a track is stored in the `Bytes` column of the `Track` table.,Track,Track.Bytes,,,,
+chinook,C,s06,schema,relationship,schema,True,1.0,True,,,4,0,2.9382828749949113,9368,67,0.0009703000000000001,"An invoice connects to its customer through `Invoice.CustomerId`, which references `Customer.CustomerId` (accepted relationship).",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
+chinook,C,s07,schema,relationship,schema,True,1.0,True,,,4,0,2.1665048750001006,9372,72,0.0009732,"A customer is linked to their supporting employee through `Customer.SupportRepId`, which references `Employee.EmployeeId` (an accepted relationship).",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
+chinook,C,s08,schema,relationship,schema,True,1.0,True,,,4,0,2.3383237499947427,9373,75,0.0009748000000000001,"A track is linked to its album through `Track.AlbumId`, which references `Album.AlbumId`; join Track to Album on those columns.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
+chinook,C,s09,schema,relationship,schema,True,1.0,True,,,4,0,2.0478925420029555,9373,74,0.0009743000000000001,"InvoiceLine refers to the sold track through `InvoiceLine.TrackId`, which joins to `Track.TrackId` (an accepted relationship).",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
+chinook,C,s10,schema,relationship,schema,True,1.0,True,,,4,0,2.03963791699789,9370,79,0.0009765,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`; join `Track.GenreId = Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
+chinook,C,s11,schema,path,schema,True,1.0,True,,,10,0,2.7742708749865415,9393,120,0.0009993,"Join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId, then Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, and InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId to reach the tracks customers bought.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
+chinook,C,s12,schema,path,schema,True,1.0,True,,,15,0,2.964287416994921,9416,137,0.0010101,"Join Playlist to PlaylistTrack on PlaylistId, then to Track on TrackId, then to Album on AlbumId, and finally to Artist on ArtistId; filter by Playlist.Name. The join relationships are accepted.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
+chinook,C,s13,schema,path,schema,True,1.0,True,,,10,0,2.528308457985986,9410,130,0.001006,"Join Artist to Album on Artist.ArtistId = Album.ArtistId, then Album to Track on Album.AlbumId = Track.AlbumId, and Track to Genre on Track.GenreId = Genre.GenreId; this connects each artist to genres of tracks on their albums.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
+chinook,C,s14,schema,path,schema,True,1.0,True,,,7,0,2.120525958991493,9397,86,0.0009827,"Join Employee.EmployeeId to Customer.SupportRepId, then Customer.CustomerId to Invoice.CustomerId; this links each employee to invoices for their supported customers.",Employee; Customer; Invoice,Employee.EmployeeId; Customer.SupportRepId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
+chinook,C,s15,schema,path,schema,True,1.0,True,,,11,0,2.3626711670076475,9414,132,0.0010074,"Join Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, then to Track on InvoiceLine.TrackId = Track.TrackId, and finally to MediaType on Track.MediaTypeId = MediaType.MediaTypeId to get each track’s media type.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
+chinook,C,s16,schema,unanswerable,abstain,True,,,,,0,0,1.789482374995714,9350,40,0.000955,The schema does not identify any field that records refunds.,,,,,,
+chinook,C,s17,schema,unanswerable,abstain,True,,,,,0,0,1.7664447919960367,9355,44,0.0009575,The schema does not include a column for a track’s average user rating.,,,,,,
+chinook,C,s18,schema,unanswerable,abstain,True,,,,,0,0,2.229602583000087,9356,45,0.0009581,The provided schema contains no table that records customer sign-in events or login times.,,,,,,
+chinook,C,s19,schema,unanswerable,abstain,True,,,,,0,0,2.2518904589960584,9359,60,0.0009659000000000001,"The provided schema has no stock or inventory table or album-copy quantity column, so it does not indicate where the number of album copies in stock is kept.",,,,,,
+chinook,C,s20,schema,unanswerable,abstain,True,,,,,0,0,1.7112123330007307,9354,51,0.0009609000000000001,The schema does not show a date-of-birth column for customers; BirthDate is listed only for employees.,,,,,,
+chinook,C,d01,data,simple,sql,True,,,True,,0,0,1.9631562080030562,9352,53,0.0009617,Counts the customers whose country is Germany.,Customer,Customer.Country,,SELECT COUNT(*) AS customer_count FROM Customer WHERE Country = 'Germany';,SELECT COUNT(*) AS customer_count FROM Customer WHERE Country = 'Germany';,
+chinook,C,d02,data,simple,sql,True,,,True,,0,0,2.240091958010453,9355,65,0.000968,Counts tracks whose duration exceeds 10 minutes.,Track,Track.Milliseconds,,"SELECT COUNT(*) AS track_count
 FROM Track
 WHERE Milliseconds > 10 * 60 * 1000;","SELECT COUNT(*) AS track_count
 FROM Track
 WHERE Milliseconds > 10 * 60 * 1000;",
-C,d03,data,simple,sql,True,,,True,,0,0,2.2673752499977127,9361,86,0.0009791000000000001,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,SELECT SUM(Total) AS sum_invoice_totals FROM Invoice WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';,SELECT SUM(Total) AS sum_invoice_totals FROM Invoice WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';,
-C,d04,data,simple,sql,True,,,True,,0,0,2.67176058300538,9359,78,0.0009749000000000001,Finds the employee with the earliest hire date and returns their first and last name.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
+chinook,C,d03,data,simple,sql,True,,,True,,0,0,2.2673752499977127,9361,86,0.0009791000000000001,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,SELECT SUM(Total) AS sum_invoice_totals FROM Invoice WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';,SELECT SUM(Total) AS sum_invoice_totals FROM Invoice WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';,
+chinook,C,d04,data,simple,sql,True,,,True,,0,0,2.67176058300538,9359,78,0.0009749000000000001,Finds the employee with the earliest hire date and returns their first and last name.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
 FROM Employee
 ORDER BY HireDate ASC
 LIMIT 1;","SELECT FirstName, LastName
 FROM Employee
 ORDER BY HireDate ASC
 LIMIT 1;",
-C,d05,data,simple,sql,True,,,True,,0,0,2.347624750007526,9353,57,0.0009638000000000001,Counts tracks whose Composer field is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS tracks_without_composer
+chinook,C,d05,data,simple,sql,True,,,True,,0,0,2.347624750007526,9353,57,0.0009638000000000001,Counts tracks whose Composer field is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS tracks_without_composer
 FROM Track
 WHERE Composer IS NULL;","SELECT COUNT(*) AS tracks_without_composer
 FROM Track
 WHERE Composer IS NULL;",
-C,d06,data,join,sql,True,,,True,,0,0,3.2146727920044214,9355,190,0.0010305,"This calculates sales revenue from invoice line prices and quantities, groups it by artist, and returns the five highest-revenue artists.",,,,"SELECT ar.Name AS Artist, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+chinook,C,d06,data,join,sql,True,,,True,,0,0,3.2146727920044214,9355,190,0.0010305,"This calculates sales revenue from invoice line prices and quantities, groups it by artist, and returns the five highest-revenue artists.",,,,"SELECT ar.Name AS Artist, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
 FROM Artist AS ar
 JOIN Album AS al ON al.ArtistId = ar.ArtistId
 JOIN Track AS t ON t.AlbumId = al.AlbumId
@@ -331,7 +331,7 @@ JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
 GROUP BY ar.ArtistId, ar.Name
 ORDER BY SalesRevenue DESC
 LIMIT 5;",
-C,d07,data,join,sql,True,,,True,,0,0,4.091281665998395,9392,161,0.0010197000000000001,"Computes the sum of invoice totals for each sales support agent’s customers, returning the agent’s first and last names with the sum.",,,,"SELECT e.FirstName, e.LastName, SUM(i.Total) AS InvoiceTotalSum
+chinook,C,d07,data,join,sql,True,,,True,,0,0,4.091281665998395,9392,161,0.0010197000000000001,"Computes the sum of invoice totals for each sales support agent’s customers, returning the agent’s first and last names with the sum.",,,,"SELECT e.FirstName, e.LastName, SUM(i.Total) AS InvoiceTotalSum
 FROM Employee AS e
 JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
 JOIN Invoice AS i ON i.CustomerId = c.CustomerId
@@ -342,7 +342,7 @@ JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
 JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 WHERE e.Title = 'Sales Support Agent'
 GROUP BY e.EmployeeId, e.FirstName, e.LastName;",
-C,d08,data,join,sql,True,,,True,,0,0,2.299661750002997,9383,99,0.0009878,Counts the tracks for each media type and returns the media type name with its track count.,,,,"SELECT m.Name AS MediaType, COUNT(t.TrackId) AS TrackCount
+chinook,C,d08,data,join,sql,True,,,True,,0,0,2.299661750002997,9383,99,0.0009878,Counts the tracks for each media type and returns the media type name with its track count.,,,,"SELECT m.Name AS MediaType, COUNT(t.TrackId) AS TrackCount
 FROM MediaType AS m
 LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
 GROUP BY m.MediaTypeId, m.Name
@@ -351,7 +351,7 @@ FROM MediaType AS m
 LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
 GROUP BY m.MediaTypeId, m.Name
 ORDER BY m.MediaTypeId;",
-C,d09,data,join,sql,True,,,True,,0,0,3.019453542001429,9403,183,0.0010318000000000003,Returns the album title and artist name for the album with the most tracks.,Album; Track; Artist,Album.AlbumId; Album.Title; Album.ArtistId; Track.AlbumId; Track.TrackId; Artist.ArtistId; Artist.Name,,"SELECT Album.Title, Artist.Name AS ArtistName
+chinook,C,d09,data,join,sql,True,,,True,,0,0,3.019453542001429,9403,183,0.0010318000000000003,Returns the album title and artist name for the album with the most tracks.,Album; Track; Artist,Album.AlbumId; Album.Title; Album.ArtistId; Track.AlbumId; Track.TrackId; Artist.ArtistId; Artist.Name,,"SELECT Album.Title, Artist.Name AS ArtistName
 FROM Album
 JOIN Track ON Track.AlbumId = Album.AlbumId
 JOIN Artist ON Artist.ArtistId = Album.ArtistId
@@ -364,7 +364,7 @@ JOIN Artist ON Artist.ArtistId = Album.ArtistId
 GROUP BY Album.AlbumId, Album.Title, Artist.Name
 ORDER BY COUNT(Track.TrackId) DESC
 LIMIT 1;",
-C,d10,data,join,sql,True,,,True,,0,0,2.4158686669979943,9385,98,0.0009875,"Returns the five customers with the highest summed invoice totals, showing each customer's first and last name.",,,,"SELECT c.FirstName, c.LastName
+chinook,C,d10,data,join,sql,True,,,True,,0,0,2.4158686669979943,9385,98,0.0009875,"Returns the five customers with the highest summed invoice totals, showing each customer's first and last name.",,,,"SELECT c.FirstName, c.LastName
 FROM Customer AS c
 JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 GROUP BY c.CustomerId, c.FirstName, c.LastName
@@ -375,7 +375,7 @@ JOIN Invoice AS i ON i.CustomerId = c.CustomerId
 GROUP BY c.CustomerId, c.FirstName, c.LastName
 ORDER BY SUM(i.Total) DESC
 LIMIT 5;",
-C,d11,data,value,sql,True,,,True,,0,0,4.115107207995607,9360,171,0.0010215,This calculates the total quantity of Rock tracks across all invoice line items.,InvoiceLine; Track; Genre,InvoiceLine.Quantity; InvoiceLine.TrackId; Track.TrackId; Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COALESCE(SUM(il.Quantity), 0) AS rock_units_sold
+chinook,C,d11,data,value,sql,True,,,True,,0,0,4.115107207995607,9360,171,0.0010215,This calculates the total quantity of Rock tracks across all invoice line items.,InvoiceLine; Track; Genre,InvoiceLine.Quantity; InvoiceLine.TrackId; Track.TrackId; Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COALESCE(SUM(il.Quantity), 0) AS rock_units_sold
 FROM InvoiceLine AS il
 JOIN Track AS t ON t.TrackId = il.TrackId
 JOIN Genre AS g ON g.GenreId = t.GenreId
@@ -384,19 +384,19 @@ FROM InvoiceLine AS il
 JOIN Track AS t ON t.TrackId = il.TrackId
 JOIN Genre AS g ON g.GenreId = t.GenreId
 WHERE g.Name = 'Rock';",
-C,d12,data,value,sql,True,,,True,,0,0,3.5974798329989426,9375,208,0.0010415,Computes the sum of invoice totals for customers whose city is Montréal.,Invoice; Customer,Invoice.Total; Invoice.CustomerId; Customer.CustomerId; Customer.City,,"SELECT SUM(i.Total) AS total_invoice_amount
+chinook,C,d12,data,value,sql,True,,,True,,0,0,3.5974798329989426,9375,208,0.0010415,Computes the sum of invoice totals for customers whose city is Montréal.,Invoice; Customer,Invoice.Total; Invoice.CustomerId; Customer.CustomerId; Customer.City,,"SELECT SUM(i.Total) AS total_invoice_amount
 FROM Invoice AS i
 JOIN Customer AS c ON i.CustomerId = c.CustomerId
 WHERE c.City = 'Montréal';","SELECT SUM(i.Total) AS total_invoice_amount
 FROM Invoice AS i
 JOIN Customer AS c ON i.CustomerId = c.CustomerId
 WHERE c.City = 'Montréal';",
-C,d13,data,value,sql,True,,,True,,0,0,2.1890750840102555,9360,71,0.0009715,This computes the sum of invoice totals for invoices billed to São Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
+chinook,C,d13,data,value,sql,True,,,True,,0,0,2.1890750840102555,9360,71,0.0009715,This computes the sum of invoice totals for invoices billed to São Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
 FROM Invoice
 WHERE BillingCity = 'São Paulo';","SELECT SUM(Total) AS total_invoice_amount
 FROM Invoice
 WHERE BillingCity = 'São Paulo';",
-C,d14,data,value,sql,False,,,True,,0,0,2.9071355829946697,9367,135,0.0010042,Counts distinct tracks of the purchased AAC audio media type that appear on at least one invoice line.,Track; MediaType; InvoiceLine,Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name; InvoiceLine.TrackId,,"SELECT COUNT(DISTINCT t.TrackId) AS track_count
+chinook,C,d14,data,value,sql,False,,,True,,0,0,2.9071355829946697,9367,135,0.0010042,Counts distinct tracks of the purchased AAC audio media type that appear on at least one invoice line.,Track; MediaType; InvoiceLine,Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name; InvoiceLine.TrackId,,"SELECT COUNT(DISTINCT t.TrackId) AS track_count
 FROM Track AS t
 JOIN MediaType AS m ON t.MediaTypeId = m.MediaTypeId
 JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
@@ -405,17 +405,321 @@ FROM Track AS t
 JOIN MediaType AS m ON t.MediaTypeId = m.MediaTypeId
 JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
 WHERE m.Name = 'Purchased AAC audio file';",
-C,d15,data,value,sql,True,,,True,,0,0,2.060069625003962,9376,93,0.0009841000000000001,Counts tracks whose genre is named “Sci Fi & Fantasy.”,Track; Genre,Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COUNT(*) AS track_count
+chinook,C,d15,data,value,sql,True,,,True,,0,0,2.060069625003962,9376,93,0.0009841000000000001,Counts tracks whose genre is named “Sci Fi & Fantasy.”,Track; Genre,Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COUNT(*) AS track_count
 FROM Track AS t
 JOIN Genre AS g ON t.GenreId = g.GenreId
 WHERE g.Name = 'Sci Fi & Fantasy';","SELECT COUNT(*) AS track_count
 FROM Track AS t
 JOIN Genre AS g ON t.GenreId = g.GenreId
 WHERE g.Name = 'Sci Fi & Fantasy';",
-C,d16,data,unanswerable,abstain,True,,,,,0,0,4.0795422500086715,9354,264,0.0010674,"The database records track purchases on invoices, but contains no listening records, so it cannot determine how many tracks were listened to last year.",,,,,,
-C,d17,data,unanswerable,abstain,True,,,,,0,0,2.0245298749941867,9356,55,0.0009631,"The database context contains no user ratings or rating table/column, so the tracks with the highest average user rating cannot be determined.",,,,,,
-C,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.277181291006855,18771,124,0.0019391000000000002,"The actual email addresses are masked, and the database interface does not allow filtering on Customer.Email, so the number of Gmail users cannot be determined.",Customer,Customer.Email,,"SELECT COUNT(*) AS gmail_customer_count
+chinook,C,d16,data,unanswerable,abstain,True,,,,,0,0,4.0795422500086715,9354,264,0.0010674,"The database records track purchases on invoices, but contains no listening records, so it cannot determine how many tracks were listened to last year.",,,,,,
+chinook,C,d17,data,unanswerable,abstain,True,,,,,0,0,2.0245298749941867,9356,55,0.0009631,"The database context contains no user ratings or rating table/column, so the tracks with the highest average user rating cannot be determined.",,,,,,
+chinook,C,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.277181291006855,18771,124,0.0019391000000000002,"The actual email addresses are masked, and the database interface does not allow filtering on Customer.Email, so the number of Gmail users cannot be determined.",Customer,Customer.Email,,"SELECT COUNT(*) AS gmail_customer_count
 FROM Customer
 WHERE Email LIKE '%@gmail.com';",,"invalid: column Customer.Email is masked: select it as a plain column to get ***; it cannot be used in expressions, filters, joins, sorting, grouping, subqueries or set operations"
-C,d19,data,unanswerable,abstain,True,,,,,0,0,1.798374749996583,9358,58,0.0009648,"The database does not provide a discount amount or a pre-discount invoice value, so the total discount on 2012 invoices cannot be determined.",,,,,,
-C,d20,data,unanswerable,abstain,True,,,,,0,0,1.814646041006199,9354,57,0.0009639000000000001,"The database describes digital music tracks and sales but contains no inventory or stock-status data, so the number currently out of stock cannot be determined.",,,,,,
+chinook,C,d19,data,unanswerable,abstain,True,,,,,0,0,1.798374749996583,9358,58,0.0009648,"The database does not provide a discount amount or a pre-discount invoice value, so the total discount on 2012 invoices cannot be determined.",,,,,,
+chinook,C,d20,data,unanswerable,abstain,True,,,,,0,0,1.814646041006199,9354,57,0.0009639000000000001,"The database describes digital music tracks and sales but contains no inventory or stock-status data, so the number currently out of stock cannot be determined.",,,,,,
+financial,A,fs01,schema,columns,schema,False,0.5,,,,1,0,1.8489782079996075,1000,54,0.000127,The schema does not identify which district column holds average salary; the district columns are labeled A2–A16 without descriptions.,district,,,,,
+financial,A,fs02,schema,columns,schema,True,1.0,,,,17,0,2.188987250003265,1002,125,0.0001627,"The schema does not identify a column for the number of inhabitants of a district; district contains fields A2–A16, whose meanings are not provided.",district,district.district_id; district.A2; district.A3; district.A4; district.A5; district.A6; district.A7; district.A8; district.A9; district.A10; district.A11; district.A12; district.A13; district.A14; district.A15; district.A16,,,,
+financial,A,fs03,schema,columns,schema,True,1.0,,,,2,0,1.7429405839939136,1010,62,0.000132,The `disp` table’s `type` column indicates whether a person is an account owner or an authorized user; its values distinguish the two roles.,disp,disp.type,,,,
+financial,A,fs04,schema,columns,abstain,False,0.0,,,,0,0,1.7961609170015436,1002,53,0.0001267,The schema shows district columns A2–A16 but does not identify which one represents the region a district belongs to.,,,,,,
+financial,A,fs05,schema,columns,schema,True,1.0,,,,2,0,1.7839121669967426,1000,63,0.0001315,"The district name is not explicitly labeled; the schema shows district.A2 as a text column, but does not specify which district column holds the name.",district,district.A2,,,,
+financial,A,fs06,schema,relationship,schema,True,1.0,True,,,4,0,2.251047874990036,1004,67,0.0001339,"The `loan` table connects to `account` through `loan.account_id`, which references `account.account_id`.",loan; account,loan.account_id; account.account_id,loan; account,,,
+financial,A,fs07,schema,relationship,schema,True,1.0,True,,,4,0,2.016619834001176,1006,81,0.00014110000000000001,"An account links to its district through `account.district_id`, which references `district.district_id`. The schema does not specify that this district is specifically the branch’s district.",account; district,account.district_id; district.district_id,account; district,,,
+financial,A,fs08,schema,relationship,schema,True,1.0,True,,,4,0,1.8606092080008239,1005,69,0.000135,"A credit card is linked to its disposition through `card.disp_id`, which references `disp.disp_id`.",card; disp,card.disp_id; disp.disp_id,card; disp,,,
+financial,A,fs09,schema,relationship,schema,True,1.0,True,,,4,0,1.7746169589954661,1005,66,0.0001335,"A payment order is linked to its source account through `order.account_id`, which references `account.account_id`.",order; account,order.account_id; account.account_id,order; account,,,
+financial,A,fs10,schema,relationship,schema,True,1.0,True,,,4,0,1.7455060420033988,1003,68,0.0001343,"The `disp` table refers to its client through `disp.client_id`, a foreign key referencing `client.client_id`.",disp; client,disp.client_id; client.client_id,disp; client,,,
+financial,A,fs11,schema,path,schema,True,1.0,True,,,7,0,1.9147352909931215,1007,92,0.0001467,"Join `card.disp_id` to `disp.disp_id`, then `disp.account_id` to `account.account_id` to reach the account associated with the card.",card; disp; account,card.disp_id; disp.disp_id; disp.account_id; account.account_id,card; disp; account,,,
+financial,A,fs12,schema,path,schema,True,1.0,True,,,9,0,2.5158996250102064,1009,147,0.0001744,"Join `order.account_id` to `account.account_id`, then `account.district_id` to `district.district_id` to get the district associated with the ordering account. The schema does not establish that this district is specifically the bank branch the payment is paid from; `order.bank_to` and `order.account_to` describe the destination, and no branch table or source-branch relationship is provided.",order; account; district,order.account_id; account.account_id; account.district_id; district.district_id; order.bank_to; order.account_to,order; account; district,,,
+financial,A,fs13,schema,path,schema,True,1.0,True,,,9,0,2.4036288750066888,1006,122,0.00016160000000000002,"Join each loan to its account using `account_id`, then join the account’s `district_id` to `district.district_id`; this identifies the district associated with each loan’s account. The schema does not establish that this account district is specifically the branch where the loan was granted.",loan; account; district,loan.account_id; account.account_id; account.district_id; district.district_id; district.A2; district.A3,loan; account; district,,,
+financial,A,fs14,schema,path,schema,False,0.6666666666666666,False,,,4,0,1.8189654590096325,1005,69,0.000135,Join `disp` to `loan` on their shared `account_id`; this connects a disposition to loans granted on its account.,disp; loan,disp.account_id; loan.account_id,disp; loan,,,
+financial,A,fs15,schema,path,schema,True,1.0,True,,,8,0,2.573880374999135,1004,103,0.0001519,"Join `card` to `disp` on `disp_id`, then join `disp` to `client` on `client_id`; filter by the given card’s `card_id` to find its client.",card; disp; client,card.card_id; card.disp_id; disp.disp_id; disp.client_id; client.client_id,card; disp; client,,,
+financial,A,fs16,schema,unanswerable,abstain,True,,,,,0,0,1.5136770420067478,999,42,0.00012090000000000001,The schema does not show a column for a client's credit score.,,,,,,
+financial,A,fs17,schema,unanswerable,abstain,True,,,,,0,0,1.7253914999892004,1003,41,0.00012080000000000001,The schema does not identify any table that records ATM locations.,,,,,,
+financial,A,fs18,schema,unanswerable,abstain,True,,,,,0,0,1.4819846659956966,998,41,0.00012030000000000001,The schema does not include a column for a client's occupation.,,,,,,
+financial,A,fs19,schema,unanswerable,abstain,True,,,,,0,0,1.7274119159992551,1002,45,0.0001227,The schema does not include a column identifying the bank employee who approved a loan.,,,,,,
+financial,A,fs20,schema,unanswerable,abstain,True,,,,,0,0,2.0157523750094697,1002,63,0.00013169999999999998,"The schema has a card.issued column, but it does not specify that this is an expiry date; no expiry-date column is shown.",card,card.issued,,,,
+financial,A,fd01,data,simple,sql,True,,,True,,0,0,2.1827809590031393,1002,52,0.0001262,Counts the loans whose duration is 60 months.,loan,loan.duration,,SELECT COUNT(*) FROM loan WHERE duration = 60;,SELECT COUNT(*) FROM loan WHERE duration = 60;,
+financial,A,fd02,data,simple,abstain,False,,,,,0,0,1.6416639590024715,1003,56,0.0001283,"The schema does not include a salary field or a district-level average salary, so the district with the lowest average salary cannot be determined.",,,,,,
+financial,A,fd03,data,simple,sql,True,,,True,,0,0,2.0412688749929657,1003,69,0.00013480000000000002,"Counts districts whose A4 population value is greater than 100,000.",district,district.A4,,"SELECT COUNT(*) AS district_count
+FROM district
+WHERE CAST(A4 AS INTEGER) > 100000;","SELECT COUNT(*) AS district_count
+FROM district
+WHERE CAST(A4 AS INTEGER) > 100000;",
+financial,A,fd04,data,simple,sql,True,,,True,,0,0,1.7576920830033487,1001,66,0.0001331,Counts accounts opened during 1996.,account,account.date,,SELECT COUNT(*) FROM account WHERE date >= '1996-01-01' AND date < '1997-01-01';,SELECT COUNT(*) FROM account WHERE date >= '1996-01-01' AND date < '1997-01-01';,
+financial,A,fd05,data,simple,sql,True,,,True,,0,0,1.779154458999983,998,70,0.00013480000000000002,Returns the region (A3) with the greatest number of districts.,district,district.A3,,"SELECT A3 AS region
+FROM district
+GROUP BY A3
+ORDER BY COUNT(*) DESC
+LIMIT 1;","SELECT A3 AS region
+FROM district
+GROUP BY A3
+ORDER BY COUNT(*) DESC
+LIMIT 1;",
+financial,A,fd06,data,join,sql,True,,,True,,0,0,2.425587332996656,1010,128,0.000165,"Returns the five districts with the most accounts, showing each district’s name (A2) and account count.",district; account,district.A2; district.district_id; account.account_id; account.district_id,,"SELECT d.A2 AS district_name, COUNT(a.account_id) AS account_count
+FROM district AS d
+JOIN account AS a ON a.district_id = d.district_id
+GROUP BY d.district_id, d.A2
+ORDER BY account_count DESC
+LIMIT 5;","SELECT d.A2 AS district_name, COUNT(a.account_id) AS account_count
+FROM district AS d
+JOIN account AS a ON a.district_id = d.district_id
+GROUP BY d.district_id, d.A2
+ORDER BY account_count DESC
+LIMIT 5;",
+financial,A,fd07,data,join,sql,True,,,True,,0,0,2.4349132500065025,1016,165,0.00018410000000000003,"Computes the total loan amount for each region, using the region of the district where each loan’s account is held.",,,,"SELECT d.A3 AS region, SUM(l.amount) AS total_loan_amount
+FROM loan AS l
+JOIN account AS a ON a.account_id = l.account_id
+JOIN district AS d ON d.district_id = a.district_id
+GROUP BY d.A3;","SELECT d.A3 AS region, SUM(l.amount) AS total_loan_amount
+FROM loan AS l
+JOIN account AS a ON a.account_id = l.account_id
+JOIN district AS d ON d.district_id = a.district_id
+GROUP BY d.A3;",
+financial,A,fd08,data,join,sql,True,,,True,,0,0,2.604701083007967,1004,165,0.0001829,Counts credit cards linked through dispositions to clients born before 1950.,card; disp; client,card.disp_id; disp.disp_id; disp.client_id; client.client_id; client.birth_date,,SELECT COUNT(*) FROM card AS c JOIN disp AS dp ON c.disp_id = dp.disp_id JOIN client AS cl ON dp.client_id = cl.client_id WHERE cl.birth_date < '1950-01-01';,SELECT COUNT(*) FROM card AS c JOIN disp AS dp ON c.disp_id = dp.disp_id JOIN client AS cl ON dp.client_id = cl.client_id WHERE cl.birth_date < '1950-01-01';,
+financial,A,fd09,data,join,sql,True,,,True,,0,0,1.8978019999922253,1012,104,0.00015319999999999998,"Computes the average amount of loans belonging to accounts in districts whose average salary (A11) exceeds 10,000.",,,,"SELECT AVG(l.amount) AS average_loan_amount
+FROM loan AS l
+JOIN account AS a ON l.account_id = a.account_id
+JOIN district AS d ON a.district_id = d.district_id
+WHERE d.A11 > 10000;","SELECT AVG(l.amount) AS average_loan_amount
+FROM loan AS l
+JOIN account AS a ON l.account_id = a.account_id
+JOIN district AS d ON a.district_id = d.district_id
+WHERE d.A11 > 10000;",
+financial,A,fd10,data,join,sql,True,,,True,,0,0,2.399693708997802,1009,152,0.00017690000000000002,Counts accounts that have at least one loan and are linked through a disposition to at least one credit card.,account; loan; disp; card,account.account_id; loan.account_id; disp.account_id; disp.disp_id; card.disp_id,,"SELECT COUNT(*)
+FROM account a
+WHERE EXISTS (
+    SELECT 1
+    FROM loan l
+    WHERE l.account_id = a.account_id
+)
+AND EXISTS (
+    SELECT 1
+    FROM disp d
+    JOIN card c ON c.disp_id = d.disp_id
+    WHERE d.account_id = a.account_id
+);","SELECT COUNT(*)
+FROM account a
+WHERE EXISTS (
+    SELECT 1
+    FROM loan l
+    WHERE l.account_id = a.account_id
+)
+AND EXISTS (
+    SELECT 1
+    FROM disp d
+    JOIN card c ON c.disp_id = d.disp_id
+    WHERE d.account_id = a.account_id
+);",
+financial,A,fd11,data,value,abstain,False,,,,,0,0,4.888367583000218,1008,381,0.00029130000000000003,"The schema does not define which transaction types or operations represent money put into an account, so I cannot determine the required count.",,,,,,
+financial,A,fd12,data,value,abstain,False,,,,,0,0,2.635389041999588,1002,156,0.0001782,"The schema does not identify which transactions were made with a credit card: `trans` has no card reference or payment-method column, and no data values are provided to establish a matching operation label.",trans; card,trans.operation; card.type,,,,
+financial,A,fd13,data,value,sql,True,,,True,,0,0,4.395224332998623,1004,258,0.0002294,Counts distinct accounts with at least one transaction marked as an old-age pension payment.,trans,trans.account_id; trans.k_symbol,,SELECT COUNT(DISTINCT account_id) FROM trans WHERE k_symbol = 'DUCHOD';,SELECT COUNT(DISTINCT account_id) FROM trans WHERE k_symbol = 'DUCHOD';,
+financial,A,fd14,data,value,abstain,False,,,,,0,0,3.887528083010693,1006,257,0.0002291,"The schema shows that standing payment orders are stored in `order` with their amounts in `amount` and category in `k_symbol`, but it does not specify which `k_symbol` value denotes insurance.",,,,,,
+financial,A,fd15,data,value,sql,False,,,True,,0,0,1.7097689579968574,1000,51,0.0001255,Counts the accounts whose frequency is monthly.,account,account.frequency,,SELECT COUNT(*) FROM account WHERE frequency = 'MONTHLY';,SELECT COUNT(*) FROM account WHERE frequency = 'MONTHLY';,
+financial,A,fd16,data,unanswerable,abstain,True,,,,,0,0,1.6140794159873622,997,46,0.0001227,The schema contains no marital-status column or other stated data identifying which clients are married.,,,,,,
+financial,A,fd17,data,unanswerable,abstain,True,,,,,0,0,1.6886297080054646,1001,47,0.0001236,The schema has no exchange-rate field or other information specifying the rate used for each transaction.,,,,,,
+financial,A,fd18,data,unanswerable,abstain,True,,,,,0,0,1.8962927079992369,999,93,0.0001464,"The schema has no card expiration date or stated rule for calculating expiration, so the number of expired cards cannot be determined.",card,card.issued,,,,
+financial,A,fd19,data,unanswerable,abstain,True,,,,,0,0,2.0108824170019943,1004,57,0.00012890000000000002,"The schema has no information about internet-banking logins, so the number of clients who logged in during 1998 cannot be determined.",,,,,,
+financial,A,fd20,data,unanswerable,abstain,True,,,,,0,0,2.124976457998855,1001,103,0.00015160000000000003,"The schema has no account closure status or closure date, so it cannot determine how many accounts were closed in 1997.",,,,,,
+financial,B,fs01,schema,columns,abstain,False,0.5,,,,0,0,1.8385946250054985,2638,52,0.0002898,The schema does not identify a district column as average salary; the meanings of the district attributes are unspecified.,district,,,,,
+financial,B,fs02,schema,columns,abstain,False,0.5,,,,0,0,1.718577624997124,2640,54,0.000291,"The schema lists district-level attributes in the district table, but does not identify which attribute represents the number of inhabitants.",district,,,,,
+financial,B,fs03,schema,columns,schema,True,1.0,,,,4,0,1.9964515830070013,2648,100,0.0003148,"The `disp` table records a person's role on an account in `disp.type`: `OWNER` means the person owns it, while `DISPONENT` means they are another account participant. Use `disp.client_id` to identify the person and `disp.account_id` to identify the account.",disp,disp.type; disp.client_id; disp.account_id,,,,
+financial,B,fs04,schema,columns,schema,True,1.0,,,,2,0,1.8486125839990564,2640,51,0.0002895,"The district’s region is stored in `district.A3`, described as the region name.",district,district.A3,,,,
+financial,B,fs05,schema,columns,schema,True,1.0,,,,2,0,1.8341063330008183,2638,45,0.0002863,The district name is stored in `district.A2`.,district,district.A2,,,,
+financial,B,fs06,schema,relationship,schema,True,1.0,True,,,4,0,1.897479207997094,2656,67,0.0002991,"A loan connects to the account it was granted on through `loan.account_id`, which references `account.account_id`.",loan; account,loan.account_id; account.account_id,loan; account,,,
+financial,B,fs07,schema,relationship,schema,True,1.0,True,,,4,0,1.6787627080047969,2660,68,0.0003,"An account is linked to its district through `account.district_id`, which references `district.district_id`.",account; district,account.district_id; district.district_id,account; district,,,
+financial,B,fs08,schema,relationship,schema,True,1.0,True,,,4,0,2.5225072909961455,2643,73,0.0003008,"A credit card is linked to the disposition it was issued for by `card.disp_id`, which references `disp.disp_id`.",card; disp,card.disp_id; disp.disp_id,card; disp,,,
+financial,B,fs09,schema,relationship,schema,True,1.0,True,,,4,0,1.9268492919945857,2657,69,0.0003002,"A payment order is linked to the account it is paid from through `order.account_id`, which references `account.account_id`.",order; account,order.account_id; account.account_id,order; account,,,
+financial,B,fs10,schema,relationship,schema,True,1.0,True,,,4,0,2.037794165997184,2641,63,0.00029560000000000003,"A disposition refers to its client through `disp.client_id`, which references `client.client_id`.",disp; client,disp.client_id; client.client_id,disp; client,,,
+financial,B,fs11,schema,path,schema,True,1.0,True,,,7,0,2.005230125010712,2671,93,0.00031360000000000003,"Join `card` to `disp` on `disp_id`, then join `disp` to `account` on `account_id` to identify the account associated with the card.",card; disp; account,card.disp_id; disp.disp_id; disp.account_id; account.account_id,card; disp; account,,,
+financial,B,fs12,schema,path,schema,True,1.0,True,,,7,0,2.3905532920034602,2673,116,0.0003253,"Join payment orders to accounts on `order.account_id = account.account_id`, then join accounts to their district on `account.district_id = district.district_id`. This identifies the district associated with the account the order is paid from; the schema does not specify a separate bank-branch relationship.",order; account; district,order.account_id; account.account_id; account.district_id; district.district_id,order; account; district,,,
+financial,B,fs13,schema,path,schema,True,1.0,True,,,8,0,2.1856855830119457,2670,101,0.0003175,"Join `loan` to `account` on `account_id`, then join `account` to `district` on `district_id`; the district table contains the district name in `A2`.",loan; account; district,loan.account_id; account.account_id; account.district_id; district.district_id; district.A2,loan; account; district,,,
+financial,B,fs14,schema,path,schema,True,1.0,True,,,6,0,1.8930940840073163,2657,88,0.0003097,"Join `disp` to `account` on `account_id`, then join `account` to `loan` on `account_id` to find loans associated with the disposition’s account.",disp; account; loan,disp.account_id; account.account_id; loan.account_id,disp; account; loan,,,
+financial,B,fs15,schema,path,schema,True,1.0,True,,,8,0,1.9438568339974154,2668,108,0.0003208,"Join `card` to `disp` on `disp_id`, then join `disp` to `client` on `client_id`; filter by the card’s `card_id` to find its associated client. These are listed relationships.",card; disp; client,card.card_id; card.disp_id; disp.disp_id; disp.client_id; client.client_id,card; disp; client,,,
+financial,B,fs16,schema,unanswerable,abstain,True,,,,,0,0,1.9251730410032906,2637,41,0.00028419999999999997,The provided schema does not identify a client credit-score column.,,,,,,
+financial,B,fs17,schema,unanswerable,abstain,True,,,,,0,0,1.4960118750022957,2641,42,0.00028510000000000005,The provided context does not identify a table that records ATM locations.,,,,,,
+financial,B,fs18,schema,unanswerable,abstain,True,,,,,0,0,1.6805630419985391,2636,42,0.00028460000000000003,The provided schema does not include a column for a client's occupation.,,,,,,
+financial,B,fs19,schema,unanswerable,abstain,True,,,,,0,0,1.900736916999449,2640,46,0.000287,The provided schema does not include a column identifying the bank employee who approved a loan.,,,,,,
+financial,B,fs20,schema,unanswerable,abstain,True,,,,,0,0,1.6735229579935549,2640,59,0.0002935,The provided schema lists the card issue date (`card.issued`) but does not include a credit-card expiry-date column.,card,card.issued,,,,
+financial,B,fd01,data,simple,sql,True,,,True,,0,0,1.940047083000536,2640,52,0.00029,Counts the loans whose duration is 60 months.,loan,loan.duration,,SELECT COUNT(*) FROM loan WHERE duration = 60;,SELECT COUNT(*) FROM loan WHERE duration = 60;,
+financial,B,fd02,data,simple,abstain,False,,,,,0,0,2.3675033330073347,2641,58,0.0002931,"The district table contains no identified salary column or other information establishing district salary, so the district with the lowest average salary cannot be determined.",district,,,,,
+financial,B,fd03,data,simple,abstain,False,,,,,0,0,1.9193399169889744,2641,61,0.0002946,"The district table description does not identify which column contains inhabitants or specify that any column’s values represent population, so the number cannot be determined from the provided context.",,,,,,
+financial,B,fd04,data,simple,sql,True,,,True,,0,0,2.2769612919946667,2639,99,0.00031340000000000003,Counts the accounts whose opening date falls in 1996.,account,account.date,,"SELECT COUNT(*) FROM account WHERE strftime('%Y', date) = '1996';","SELECT COUNT(*) FROM account WHERE strftime('%Y', date) = '1996';",
+financial,B,fd05,data,simple,sql,True,,,True,,0,0,2.4529921659996035,2636,137,0.00033210000000000005,Returns the region (A3) with the greatest number of districts.,district,district.A3,,"SELECT A3
+FROM district
+GROUP BY A3
+ORDER BY COUNT(*) DESC
+LIMIT 1;","SELECT A3
+FROM district
+GROUP BY A3
+ORDER BY COUNT(*) DESC
+LIMIT 1;",
+financial,B,fd06,data,join,sql,True,,,True,,0,0,2.371405040990794,2664,140,0.00033640000000000005,"Counts accounts in each district and returns the five districts with the highest counts, with their names.",,,,"SELECT district.A2 AS district_name, COUNT(account.account_id) AS account_count
+FROM account
+JOIN district ON account.district_id = district.district_id
+GROUP BY district.district_id, district.A2
+ORDER BY account_count DESC
+LIMIT 5;","SELECT district.A2 AS district_name, COUNT(account.account_id) AS account_count
+FROM account
+JOIN district ON account.district_id = district.district_id
+GROUP BY district.district_id, district.A2
+ORDER BY account_count DESC
+LIMIT 5;",
+financial,B,fd07,data,join,sql,True,,,True,,0,0,2.775410332993488,2668,180,0.0003568,"Computes the total loan amount for accounts in each region, using the account’s district to determine its region.",loan; account; district,loan.account_id; loan.amount; account.account_id; account.district_id; district.district_id; district.A3,,"SELECT d.A3 AS region, SUM(l.amount) AS total_loan_amount
+FROM loan AS l
+JOIN account AS a ON l.account_id = a.account_id
+JOIN district AS d ON a.district_id = d.district_id
+GROUP BY d.A3;","SELECT d.A3 AS region, SUM(l.amount) AS total_loan_amount
+FROM loan AS l
+JOIN account AS a ON l.account_id = a.account_id
+JOIN district AS d ON a.district_id = d.district_id
+GROUP BY d.A3;",
+financial,B,fd08,data,join,sql,True,,,True,,0,0,2.534460167007637,2668,155,0.0003443,Counts cards associated with clients born before 1950.,card; disp; client,card.disp_id; disp.disp_id; disp.client_id; client.client_id; client.birth_date,,"SELECT COUNT(*) AS credit_card_count
+FROM card
+JOIN disp ON card.disp_id = disp.disp_id
+JOIN client ON disp.client_id = client.client_id
+WHERE client.birth_date < '1950-01-01';","SELECT COUNT(*) AS credit_card_count
+FROM card
+JOIN disp ON card.disp_id = disp.disp_id
+JOIN client ON disp.client_id = client.client_id
+WHERE client.birth_date < '1950-01-01';",
+financial,B,fd09,data,join,abstain,False,,,,,0,0,2.553943375009112,2676,110,0.00032260000000000004,"The context does not identify which district column represents average salary, so I cannot determine which districts meet the salary condition.",,,,,,
+financial,B,fd10,data,join,sql,True,,,True,,0,0,2.759958209004253,2693,159,0.0003488,Counts accounts that have at least one loan and at least one card issued to a disposition associated with the account.,,,,"SELECT COUNT(*)
+FROM account AS a
+WHERE EXISTS (
+    SELECT 1
+    FROM loan AS l
+    WHERE l.account_id = a.account_id
+)
+AND EXISTS (
+    SELECT 1
+    FROM disp AS d
+    JOIN card AS c ON c.disp_id = d.disp_id
+    WHERE d.account_id = a.account_id
+);","SELECT COUNT(*)
+FROM account AS a
+WHERE EXISTS (
+    SELECT 1
+    FROM loan AS l
+    WHERE l.account_id = a.account_id
+)
+AND EXISTS (
+    SELECT 1
+    FROM disp AS d
+    JOIN card AS c ON c.disp_id = d.disp_id
+    WHERE d.account_id = a.account_id
+);",
+financial,B,fd11,data,value,sql,True,,,True,,0,0,2.4585333340073703,2646,68,0.00029860000000000005,"Counts transactions categorized as PRIJEM, including interest credits, as money put into an account.",trans,trans.type,,"SELECT COUNT(*) AS transaction_count
+FROM trans
+WHERE type = 'PRIJEM';","SELECT COUNT(*) AS transaction_count
+FROM trans
+WHERE type = 'PRIJEM';",
+financial,B,fd12,data,value,sql,True,,,True,,0,0,3.2753806660039118,2640,173,0.0003505,Counts transactions whose operation is recorded as a card withdrawal.,trans,trans.operation,,SELECT COUNT(*) FROM trans WHERE operation = 'VYBER KARTOU';,SELECT COUNT(*) FROM trans WHERE operation = 'VYBER KARTOU';,
+financial,B,fd13,data,value,sql,True,,,True,,0,0,3.303358749995823,2642,194,0.0003612,Counts distinct accounts with at least one incoming transaction categorized as DUCHOD.,trans,trans.account_id; trans.k_symbol; trans.type,,SELECT COUNT(DISTINCT account_id) FROM trans WHERE k_symbol = 'DUCHOD' AND type = 'PRIJEM';,SELECT COUNT(DISTINCT account_id) FROM trans WHERE k_symbol = 'DUCHOD' AND type = 'PRIJEM';,
+financial,B,fd14,data,value,sql,True,,,True,,0,0,1.9217195829987759,2644,78,0.00030340000000000006,Computes the total amount of orders whose payment-purpose code is POJISTNE (insurance).,order,order.amount; order.k_symbol,,"SELECT SUM(amount) AS total_amount
+FROM ""order""
+WHERE k_symbol = 'POJISTNE';","SELECT SUM(amount) AS total_amount
+FROM ""order""
+WHERE k_symbol = 'POJISTNE';",
+financial,B,fd15,data,value,sql,True,,,True,,0,0,1.9232616670051357,2638,65,0.0002963,Counts accounts whose statement frequency is monthly (POPLATEK MESICNE).,account,account.frequency,,SELECT COUNT(*) FROM account WHERE frequency = 'POPLATEK MESICNE';,SELECT COUNT(*) FROM account WHERE frequency = 'POPLATEK MESICNE';,
+financial,B,fd16,data,unanswerable,abstain,True,,,,,0,0,1.7598877920099767,2635,45,0.000286,The schema does not include marital status or another field indicating which clients are married.,,,,,,
+financial,B,fd17,data,unanswerable,abstain,True,,,,,0,0,1.61497141700238,2639,49,0.0002884,The schema does not include an exchange-rate column or other information specifying the exchange rate used for transactions.,,,,,,
+financial,B,fd18,data,unanswerable,abstain,True,,,,,0,0,1.6571814579947386,2637,53,0.0002902,"The database context does not specify card expiration dates or a card lifetime, so it cannot determine how many cards have expired.",,,,,,
+financial,B,fd19,data,unanswerable,abstain,True,,,,,0,0,2.0478978750034003,2642,58,0.00029319999999999997,The provided schema does not identify internet-banking logins or record which clients logged in; it is missing the relevant login data and client linkage.,,,,,,
+financial,B,fd20,data,unanswerable,abstain,True,,,,,0,0,2.048349958000472,2639,100,0.00031390000000000004,"The schema provides account-opening dates but no account-closure date or closure status, so it cannot determine how many accounts were closed in 1997.",account,account.date,,,,
+financial,C,fs01,schema,columns,abstain,False,0.0,,,,0,0,1.9430401249992428,8233,58,0.0008523000000000001,"The district columns are described only as numeric attributes with unspecified meanings, so the context does not identify which column, if any, holds average salary.",,,,,,
+financial,C,fs02,schema,columns,abstain,False,0.0,,,,0,0,1.7398252919956576,8235,62,0.0008545,"The district table contains several numeric attributes (A4–A16), but their meanings are unspecified, so the number of inhabitants cannot be identified from the provided context.",,,,,,
+financial,C,fs03,schema,columns,schema,True,1.0,,,,2,0,1.8471189169940772,8243,61,0.0008548000000000001,The `disp` table’s `type` column indicates the person’s role for an account: `OWNER` or `DISPONENT`.,disp,disp.type,,,,
+financial,C,fs04,schema,columns,schema,True,1.0,,,,2,0,1.5567713750060648,8235,54,0.0008505,The district region is stored in `district.A3` (the district table’s region-name column).,district,district.A3,,,,
+financial,C,fs05,schema,columns,schema,True,1.0,,,,2,0,1.5591371670016088,8233,47,0.0008468000000000001,The district name is stored in the `district.A2` column.,district,district.A2,,,,
+financial,C,fs06,schema,relationship,schema,True,1.0,True,,,4,0,1.7117508749943227,8251,68,0.0008591,"A loan is connected to the account it was granted on through `loan.account_id`, which references `account.account_id`.",loan; account,loan.account_id; account.account_id,loan; account,,,
+financial,C,fs07,schema,relationship,schema,True,1.0,True,,,4,0,2.058728541000164,8255,89,0.00087,An account links to its district through `account.district_id = district.district_id`; the district table contains the district record. The context identifies the district but does not establish that it is specifically the account’s branch.,account; district,account.district_id; district.district_id,account; district,,,
+financial,C,fs08,schema,relationship,schema,True,1.0,True,,,4,0,2.1205129169975407,8238,69,0.0008583000000000001,"A credit card is linked to its disposition through `card.disp_id`, which references `disp.disp_id`.",card; disp,card.disp_id; disp.disp_id,card; disp,,,
+financial,C,fs09,schema,relationship,schema,True,1.0,True,,,4,0,2.039551042005769,8252,69,0.0008597,A payment order is linked to the account it is paid from by matching `order.account_id` to `account.account_id`.,order; account,order.account_id; account.account_id,order; account,,,
+financial,C,fs10,schema,relationship,schema,True,1.0,True,,,4,0,1.669763874990167,8236,67,0.0008571000000000001,"A disposition refers to its client through `disp.client_id`, which references the client table’s `client_id` column.",disp; client,disp.client_id; client.client_id,disp; client,,,
+financial,C,fs11,schema,path,schema,True,1.0,True,,,7,0,1.97547420799674,8266,102,0.0008776,"Join `card` to `disp` on `card.disp_id = disp.disp_id`, then join `disp` to `account` on `disp.account_id = account.account_id` to find the associated account.",card; disp; account,card.disp_id; disp.disp_id; disp.account_id; account.account_id,card; disp; account,,,
+financial,C,fs12,schema,path,schema,True,1.0,True,,,7,0,1.8798747079999885,8268,96,0.0008748000000000001,"You can link an order to its originating account with `order.account_id = account.account_id`, then link that account to its district with `account.district_id = district.district_id`.",order; account; district,order.account_id; account.account_id; account.district_id; district.district_id,order; account; district,,,
+financial,C,fs13,schema,path,schema,True,1.0,True,,,7,0,1.9986413750011707,8265,101,0.000877,"Join each loan to its account by account_id, then join the account to district by district_id; this yields the account’s district, but the schema does not establish that it is the branch where the loan was granted.",loan; account; district,loan.account_id; account.account_id; account.district_id; district.district_id,loan; account; district,,,
+financial,C,fs14,schema,path,schema,False,0.6666666666666666,False,,,4,0,2.0762407919974066,8252,76,0.0008632000000000001,Join `disp` to `loan` through their shared account using `disp.account_id = loan.account_id`; this connects a disposition to loans granted on its account.,disp; loan,disp.account_id; loan.account_id,disp; loan,,,
+financial,C,fs15,schema,path,schema,True,1.0,True,,,7,0,2.1668286670028465,8263,100,0.0008763000000000001,"Join `card` to `disp` on `disp_id`, then join `disp` to `client` on `client_id`; the client associated with the card is identified by the resulting `client` row.",card; disp; client,card.disp_id; disp.disp_id; disp.client_id; client.client_id,card; disp; client,,,
+financial,C,fs16,schema,unanswerable,abstain,True,,,,,0,0,1.8967368750018068,8232,43,0.0008447000000000001,The provided schema does not identify any column as a client credit score.,,,,,,
+financial,C,fs17,schema,unanswerable,abstain,True,,,,,0,0,1.6902868750039488,8236,42,0.0008446,The provided schema does not identify any table that records ATM locations.,,,,,,
+financial,C,fs18,schema,unanswerable,abstain,True,,,,,0,0,1.9067295839922735,8231,40,0.0008431000000000001,The provided schema does not include a client occupation column.,,,,,,
+financial,C,fs19,schema,unanswerable,abstain,True,,,,,0,0,1.6676502089976566,8235,46,0.0008465,The provided schema does not identify any column recording the bank employee who approved a loan.,,,,,,
+financial,C,fs20,schema,unanswerable,abstain,True,,,,,0,0,1.8274248339876067,8235,55,0.000851,The schema provides the card issue date (`card.issued`) but does not specify a column for the credit card’s expiry date.,,,,,,
+financial,C,fd01,data,simple,sql,True,,,True,,0,0,1.8639332500024466,8235,57,0.000852,Counts the loans whose duration is 60 months.,loan,loan.duration,,"SELECT COUNT(*) AS loan_count
+FROM loan
+WHERE duration = 60;","SELECT COUNT(*) AS loan_count
+FROM loan
+WHERE duration = 60;",
+financial,C,fd02,data,simple,abstain,False,,,,,0,0,2.0661747499980265,8236,111,0.0008791000000000001,The district table does not identify which column represents average salary; its numeric attributes A4–A16 have unspecified meanings.,district,district.A2; district.A4; district.A5; district.A6; district.A7; district.A8; district.A9; district.A10; district.A11; district.A12; district.A13; district.A14; district.A15; district.A16,,,,
+financial,C,fd03,data,simple,sql,True,,,True,,0,0,2.127434041991364,8236,67,0.0008571000000000001,"Counts districts whose A4 population value exceeds 100,000.",district,district.A4,,"SELECT COUNT(*) AS district_count
+FROM district
+WHERE CAST(A4 AS INTEGER) > 100000;","SELECT COUNT(*) AS district_count
+FROM district
+WHERE CAST(A4 AS INTEGER) > 100000;",
+financial,C,fd04,data,simple,sql,True,,,True,,0,0,2.3632265420019394,8234,68,0.0008574000000000001,Counts accounts opened during calendar year 1996.,account,account.date,,SELECT COUNT(*) FROM account WHERE date >= '1996-01-01' AND date < '1997-01-01';,SELECT COUNT(*) FROM account WHERE date >= '1996-01-01' AND date < '1997-01-01';,
+financial,C,fd05,data,simple,sql,True,,,True,,0,0,1.999731999996584,8231,70,0.0008581,Returns the region (A3) containing the greatest number of districts.,district,district.A3,,"SELECT A3 AS region
+FROM district
+GROUP BY A3
+ORDER BY COUNT(*) DESC
+LIMIT 1;","SELECT A3 AS region
+FROM district
+GROUP BY A3
+ORDER BY COUNT(*) DESC
+LIMIT 1;",
+financial,C,fd06,data,join,sql,True,,,True,,0,0,2.0430342499894323,8259,104,0.0008779000000000001,"Counts accounts in each district and returns the five districts with the highest counts, showing each district name and account count.",,,,"SELECT d.A2 AS district_name, COUNT(*) AS account_count
+FROM account AS a
+JOIN district AS d ON d.district_id = a.district_id
+GROUP BY d.district_id, d.A2
+ORDER BY account_count DESC
+LIMIT 5;","SELECT d.A2 AS district_name, COUNT(*) AS account_count
+FROM account AS a
+JOIN district AS d ON d.district_id = a.district_id
+GROUP BY d.district_id, d.A2
+ORDER BY account_count DESC
+LIMIT 5;",
+financial,C,fd07,data,join,sql,True,,,True,,0,0,2.1823504579951987,8263,133,0.0008928,"Computes the total loan amount for each region, grouping loans by the region of their associated accounts.",loan; account; district,loan.amount; loan.account_id; account.account_id; account.district_id; district.district_id; district.A3,,"SELECT d.A3 AS region, SUM(l.amount) AS total_loan_amount
+FROM loan AS l
+JOIN account AS a ON a.account_id = l.account_id
+JOIN district AS d ON d.district_id = a.district_id
+GROUP BY d.A3;","SELECT d.A3 AS region, SUM(l.amount) AS total_loan_amount
+FROM loan AS l
+JOIN account AS a ON a.account_id = l.account_id
+JOIN district AS d ON d.district_id = a.district_id
+GROUP BY d.A3;",
+financial,C,fd08,data,join,sql,True,,,True,,0,0,2.0623440420022234,8263,113,0.0008828000000000001,Counts cards associated with clients born before 1950.,card; disp; client,card.disp_id; disp.disp_id; disp.client_id; client.client_id; client.birth_date,,"SELECT COUNT(*) AS credit_card_count
+FROM card
+JOIN disp ON card.disp_id = disp.disp_id
+JOIN client ON disp.client_id = client.client_id
+WHERE client.birth_date < '1950-01-01';","SELECT COUNT(*) AS credit_card_count
+FROM card
+JOIN disp ON card.disp_id = disp.disp_id
+JOIN client ON disp.client_id = client.client_id
+WHERE client.birth_date < '1950-01-01';",
+financial,C,fd09,data,join,abstain,False,,,,,0,0,2.8600665830017533,8271,93,0.0008736,"The district attributes’ meanings are unspecified, so the context does not identify which column represents average salary or allow filtering districts above 10,000.",,,,,,
+financial,C,fd10,data,join,sql,True,,,True,,0,0,2.759880333003821,8288,135,0.0008963,Counts accounts that have at least one loan and at least one card linked through a disposition.,,,,SELECT COUNT(*) FROM account AS a WHERE EXISTS (SELECT 1 FROM loan AS l WHERE l.account_id = a.account_id) AND EXISTS (SELECT 1 FROM disp AS d JOIN card AS c ON c.disp_id = d.disp_id WHERE d.account_id = a.account_id);,SELECT COUNT(*) FROM account AS a WHERE EXISTS (SELECT 1 FROM loan AS l WHERE l.account_id = a.account_id) AND EXISTS (SELECT 1 FROM disp AS d JOIN card AS c ON c.disp_id = d.disp_id WHERE d.account_id = a.account_id);,
+financial,C,fd11,data,value,sql,True,,,True,,0,0,3.3895552499889163,8241,193,0.0009206,"Counts transactions marked PRIJEM, representing money coming into an account, including interest credits.",trans,trans.type,,SELECT COUNT(*) FROM trans WHERE type = 'PRIJEM';,SELECT COUNT(*) FROM trans WHERE type = 'PRIJEM';,
+financial,C,fd12,data,value,sql,False,,,True,,0,0,1.9080705420055892,8235,69,0.000858,Counts transactions classified as withdrawals with the credit-card operation.,trans,trans.type; trans.operation,,SELECT COUNT(*) FROM trans WHERE type = 'VYBER' AND operation = 'VYBER KARTOU';,SELECT COUNT(*) FROM trans WHERE type = 'VYBER' AND operation = 'VYBER KARTOU';,
+financial,C,fd13,data,value,sql,True,,,True,,0,0,2.8607565830025123,8237,142,0.0008947,Counts distinct accounts with at least one incoming transaction labeled as a pension payment (DUCHOD).,,,,"SELECT COUNT(DISTINCT account_id) AS account_count
+FROM trans
+WHERE k_symbol = 'DUCHOD'
+  AND type = 'PRIJEM';","SELECT COUNT(DISTINCT account_id) AS account_count
+FROM trans
+WHERE k_symbol = 'DUCHOD'
+  AND type = 'PRIJEM';",
+financial,C,fd14,data,value,sql,True,,,True,,0,0,2.187749624994467,8239,78,0.0008629000000000001,This computes the total amount of orders whose payment-purpose symbol is POJISTNE (insurance).,order,order.amount; order.k_symbol,,"SELECT SUM(amount) AS total_amount
+FROM ""order""
+WHERE k_symbol = 'POJISTNE';","SELECT SUM(amount) AS total_amount
+FROM ""order""
+WHERE k_symbol = 'POJISTNE';",
+financial,C,fd15,data,value,sql,True,,,True,,0,0,1.7442436249984894,8233,62,0.0008543000000000001,Counts accounts whose statement frequency is monthly.,account,account.frequency,,"SELECT COUNT(*) AS monthly_account_count
+FROM account
+WHERE frequency = 'POPLATEK MESICNE';","SELECT COUNT(*) AS monthly_account_count
+FROM account
+WHERE frequency = 'POPLATEK MESICNE';",
+financial,C,fd16,data,unanswerable,abstain,True,,,,,0,0,1.8373599170008674,8230,48,0.000847,The provided schema does not include a marital-status field or other information identifying which clients are married.,,,,,,
+financial,C,fd17,data,unanswerable,abstain,True,,,,,0,0,1.7338892910047434,8234,48,0.0008474000000000001,The database records transaction amounts and balances but contains no exchange-rate field or currency-conversion data.,,,,,,
+financial,C,fd18,data,unanswerable,abstain,True,,,,,0,0,2.1239527919969987,8232,57,0.0008517,The database context includes card issue dates but does not provide a card expiration date or define when a card expires.,card,card.issued,,,,
+financial,C,fd19,data,unanswerable,abstain,True,,,,,0,0,2.2251093340018997,8237,56,0.0008517,"The database context does not include internet-banking login records or a field identifying clients who logged in, so the number cannot be determined.",,,,,,
+financial,C,fd20,data,unanswerable,abstain,True,,,,,0,0,1.6906776249961695,8234,57,0.0008519,The database records account-opening dates but does not include an account-closure date or other information identifying which accounts were closed in 1997.,,,,,,

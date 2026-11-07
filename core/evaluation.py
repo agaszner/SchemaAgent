@@ -19,7 +19,7 @@ def load_questions(path: str | Path) -> list[dict]:
 
 def load_gold(path: str | Path) -> dict[str, str]:
     """`-- <id>` header lines, each followed by one SQL statement; returns id -> SQL without the trailing `;`."""
-    blocks = re.split(r"^-- ([sd]\d{2})$", Path(path).read_text(encoding="utf-8"), flags=re.M)[1:]
+    blocks = re.split(r"^-- ([a-z]*[sd]\d{2})$", Path(path).read_text(encoding="utf-8"), flags=re.M)[1:]
     gold = {}
     for qid, sql in zip(blocks[::2], blocks[1::2]):
         if qid in gold:

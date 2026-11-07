@@ -38,3 +38,43 @@
 {"id": "d18", "database": "chinook", "category": "data", "kind": "unanswerable", "question": "How many customers use a Gmail email address?", "expected": {}}
 {"id": "d19", "database": "chinook", "category": "data", "kind": "unanswerable", "question": "What was the total discount given on invoices in 2012?", "expected": {}}
 {"id": "d20", "database": "chinook", "category": "data", "kind": "unanswerable", "question": "How many tracks are currently out of stock?", "expected": {}}
+{"id": "fs01", "database": "financial", "category": "schema", "kind": "columns", "question": "Which column holds a district's average salary?", "expected": {"tables": ["district"], "columns": ["district.A11"]}}
+{"id": "fs02", "database": "financial", "category": "schema", "kind": "columns", "question": "Where is the number of inhabitants of a district stored?", "expected": {"tables": ["district"], "columns": ["district.A4"]}}
+{"id": "fs03", "database": "financial", "category": "schema", "kind": "columns", "question": "Which table and column tell whether a person owns an account or is only allowed to use it?", "expected": {"tables": ["disp"], "columns": ["disp.type"]}}
+{"id": "fs04", "database": "financial", "category": "schema", "kind": "columns", "question": "Which column holds the region that a district belongs to?", "expected": {"tables": ["district"], "columns": ["district.A3"]}}
+{"id": "fs05", "database": "financial", "category": "schema", "kind": "columns", "question": "Which column holds the name of a district?", "expected": {"tables": ["district"], "columns": ["district.A2"]}}
+{"id": "fs06", "database": "financial", "category": "schema", "kind": "relationship", "question": "How is a loan connected to the account it was granted on?", "expected": {"tables": ["loan", "account"], "columns": ["loan.account_id", "account.account_id"], "path": ["loan", "account"]}}
+{"id": "fs07", "database": "financial", "category": "schema", "kind": "relationship", "question": "How is an account linked to the district of the branch that holds it?", "expected": {"tables": ["account", "district"], "columns": ["account.district_id", "district.district_id"], "path": ["account", "district"]}}
+{"id": "fs08", "database": "financial", "category": "schema", "kind": "relationship", "question": "How is a credit card linked to the disposition it was issued for?", "expected": {"tables": ["card", "disp"], "columns": ["card.disp_id", "disp.disp_id"], "path": ["card", "disp"]}}
+{"id": "fs09", "database": "financial", "category": "schema", "kind": "relationship", "question": "How is a payment order linked to the account it is paid from?", "expected": {"tables": ["order", "account"], "columns": ["order.account_id", "account.account_id"], "path": ["order", "account"]}}
+{"id": "fs10", "database": "financial", "category": "schema", "kind": "relationship", "question": "How does a disposition refer to the client it belongs to?", "expected": {"tables": ["disp", "client"], "columns": ["disp.client_id", "client.client_id"], "path": ["disp", "client"]}}
+{"id": "fs11", "database": "financial", "category": "schema", "kind": "path", "question": "How do I get from a credit card to the account it is used on?", "expected": {"tables": ["card", "disp", "account"], "path": ["card", "disp", "account"]}}
+{"id": "fs12", "database": "financial", "category": "schema", "kind": "path", "question": "How do I link payment orders to the district of the bank branch they are paid from?", "expected": {"tables": ["order", "account", "district"], "path": ["order", "account", "district"]}}
+{"id": "fs13", "database": "financial", "category": "schema", "kind": "path", "question": "How do I find the district of the branch where each loan was granted?", "expected": {"tables": ["loan", "account", "district"], "path": ["loan", "account", "district"]}}
+{"id": "fs14", "database": "financial", "category": "schema", "kind": "path", "question": "How do I connect a disposition to the loans granted on its account?", "expected": {"tables": ["disp", "account", "loan"], "path": ["disp", "account", "loan"]}}
+{"id": "fs15", "database": "financial", "category": "schema", "kind": "path", "question": "How do I find the client who holds a given credit card?", "expected": {"tables": ["card", "disp", "client"], "path": ["card", "disp", "client"]}}
+{"id": "fs16", "database": "financial", "category": "schema", "kind": "unanswerable", "question": "Which column stores a client's credit score?", "expected": {}}
+{"id": "fs17", "database": "financial", "category": "schema", "kind": "unanswerable", "question": "Which table records the locations of the bank's ATMs?", "expected": {}}
+{"id": "fs18", "database": "financial", "category": "schema", "kind": "unanswerable", "question": "Which column stores a client's occupation?", "expected": {}}
+{"id": "fs19", "database": "financial", "category": "schema", "kind": "unanswerable", "question": "Which column records the bank employee who approved a loan?", "expected": {}}
+{"id": "fs20", "database": "financial", "category": "schema", "kind": "unanswerable", "question": "Which column stores the expiry date of a credit card?", "expected": {}}
+{"id": "fd01", "database": "financial", "category": "data", "kind": "simple", "question": "How many loans have a duration of 60 months?", "expected": {}}
+{"id": "fd02", "database": "financial", "category": "data", "kind": "simple", "question": "Which district has the lowest average salary? Give its name.", "expected": {}}
+{"id": "fd03", "database": "financial", "category": "data", "kind": "simple", "question": "How many districts have more than 100,000 inhabitants?", "expected": {}}
+{"id": "fd04", "database": "financial", "category": "data", "kind": "simple", "question": "How many accounts were opened in 1996?", "expected": {}}
+{"id": "fd05", "database": "financial", "category": "data", "kind": "simple", "question": "Which region contains the most districts?", "expected": {}}
+{"id": "fd06", "database": "financial", "category": "data", "kind": "join", "question": "Which 5 districts have the most accounts? Give the district name and the number of accounts.", "expected": {}}
+{"id": "fd07", "database": "financial", "category": "data", "kind": "join", "question": "For each region, what is the total amount of the loans granted on accounts held there? Give the region and the total.", "expected": {}}
+{"id": "fd08", "database": "financial", "category": "data", "kind": "join", "question": "How many credit cards belong to clients born before 1950?", "expected": {}}
+{"id": "fd09", "database": "financial", "category": "data", "kind": "join", "question": "What is the average loan amount for accounts held in districts with an average salary above 10,000?", "expected": {}}
+{"id": "fd10", "database": "financial", "category": "data", "kind": "join", "question": "How many accounts have at least one loan and at least one credit card issued on them?", "expected": {}}
+{"id": "fd11", "database": "financial", "category": "data", "kind": "value", "question": "How many transactions put money into an account, of any kind (interest credits included)?", "expected": {}}
+{"id": "fd12", "database": "financial", "category": "data", "kind": "value", "question": "How many transactions were withdrawals made with a credit card?", "expected": {}}
+{"id": "fd13", "database": "financial", "category": "data", "kind": "value", "question": "How many accounts received an old-age pension payment at least once?", "expected": {}}
+{"id": "fd14", "database": "financial", "category": "data", "kind": "value", "question": "What is the total amount of the standing payment orders that pay for insurance?", "expected": {}}
+{"id": "fd15", "database": "financial", "category": "data", "kind": "value", "question": "How many accounts are on a monthly frequency?", "expected": {}}
+{"id": "fd16", "database": "financial", "category": "data", "kind": "unanswerable", "question": "How many clients are married?", "expected": {}}
+{"id": "fd17", "database": "financial", "category": "data", "kind": "unanswerable", "question": "What was the exchange rate used for each transaction?", "expected": {}}
+{"id": "fd18", "database": "financial", "category": "data", "kind": "unanswerable", "question": "How many credit cards have already expired?", "expected": {}}
+{"id": "fd19", "database": "financial", "category": "data", "kind": "unanswerable", "question": "How many clients logged in to internet banking in 1998?", "expected": {}}
+{"id": "fd20", "database": "financial", "category": "data", "kind": "unanswerable", "question": "How many accounts were closed in 1997?", "expected": {}}

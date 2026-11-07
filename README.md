@@ -105,15 +105,20 @@ being analysed.
 
 ## Evaluation
 
-The benchmark asks the same model the same 40 chinook questions under three contexts:
+The benchmark asks the same model the same 40 questions per database under three contexts:
 
 - **A**: the raw DDL.
 - **B**: the generated table docs plus a relationship graph excerpt and JOIN paths.
 - **C**: everything in B plus the data profile, sample values and sample rows (masked).
 
-To run it, run all steps on chinook (the Docs step needs the OpenAI key), then press
+Two databases have question sets: `chinook` (ids `s01`..`d20`) and the BIRD `financial` database
+(ids `fs01`..`fd20`). Financial is not in git: run `data/download.sh hard` first, then register
+`data/bird/financial/financial.sqlite`. Its tests skip while the file is missing.
+
+To run it, run all steps on the database (the Docs step needs the OpenAI key), then press
 **Run benchmark (A / B / C)** in Management · Benchmark. It runs in the background and writes one row
-per (config, question) to `benchmark/results.csv` (`SCHEMASAGE_BENCHMARK_DIR`).
+per (config, question) to `benchmark/results.csv` (`SCHEMASAGE_BENCHMARK_DIR`), with a `database`
+column; a run replaces only its own database's rows.
 
 - **Execution accuracy**: share of answerable data questions whose result set matches the gold query (row order ignored, column names ignored, floats rounded to 2 decimals, extra columns allowed).
 - **Valid SQL rate**: share of answerable data questions whose first answer is SQL that passes the guard and runs.
@@ -125,6 +130,59 @@ per (config, question) to `benchmark/results.csv` (`SCHEMASAGE_BENCHMARK_DIR`).
 - **Mean latency, tokens, cost**: mean wall time per question, and summed tokens and cost per config.
 
 A refused answer counts as wrong.
+
+### Results (gpt-6-luna, reasoning effort low, 2026-11-07)
+
+| Metric | chinook A | B | C | financial A | B | C |
+|---|---:|---:|---:|---:|---:|---:|
+| Execution accuracy | 87% | 87% | 93% | 67% | 80% | 80% |
+| Valid SQL rate | 100% | 93% | 100% | 73% | 80% | 87% |
+| Schema fact accuracy | 100% | 100% | 100% | 88% | 93% | 84% |
+| Path accuracy | 100% | 100% | 100% | 90% | 100% | 90% |
+| Unsupported claim rate | 0% | 0% | 0% | 0% | 0% | 0% |
+| Abstention accuracy | 100% | 98% | 100% | 88% | 88% | 90% |
+| Cost (40 questions) | $0.008 | $0.015 | $0.040 | $0.006 | $0.012 | $0.035 |
+
+Repair success has no value on either database: no answerable question needed a retry. The valid SQL rate
+drops on financial because the model abstained instead of writing SQL, not because SQL failed.
+
+Chinook is at the ceiling: readable names and declared keys let even the raw DDL answer the schema
+questions. On financial:
+
+- **A loses on Czech codes.** Without values it cannot know that money in is `type = 'PRIJEM'`, that
+  `'POPLATEK MESICNE'` means monthly, or that card withdrawals are `operation = 'VYBER KARTOU'`
+  (fd11, fd14 and fd15 are wrong only under A; fd12 is wrong under A and C). B gets the codes from
+  the generated docs, because the docs step sees sample values (`PRIJEM`, `POPLATEK MESICNE`,
+  `VYBER KARTOU`, `POJISTNE` all appear in them). On the five value questions (fd11..fd15) B is
+  right on 5, C on 4 and A on 1. The spec expects C to win value questions; here it does not,
+  because B's docs already carry the values.
+- **`order` never needed a repair.** Only fd14 queried `order`; B and C both quoted it
+  (`FROM "order"`) and A abstained, so the expected repair retry on the reserved word never happened.
+- **Opaque columns: the docs say "unspecified", A guesses.** The generated docs name `district.A2`
+  (district name) and `A3` (region) as likely, so B and C answer fs04 (`A3`) where A abstains. For
+  `A4`..`A16` the docs say the meaning is unspecified, and B and C abstain where A guesses: A wrote
+  `d.A11 > 10000` for average salary (fd09, B and C abstain) and `A4 > 100000` for inhabitants
+  (fd03, right under A and C, B abstains). BIRD is public, so A's hits may be memorised BIRD
+  knowledge rather than reading. Only fd02 is abstained in all three. A human edit of the docs from
+  BIRD's column descriptions, in the Documentation review tab, should fix this.
+- **A's schema fact accuracy is inflated by fs02.** A said it could not identify the inhabitants
+  column but listed all 16 district columns, and scored 1.0: schema scoring is recall only
+  (`core/evaluation.py`), so extra names cost nothing. With fs02 scored 0, A is at 81%.
+- **More context can hurt.** C wrote `type = 'VYBER' AND operation = 'VYBER KARTOU'` for fd12, but
+  card withdrawals are stored with type `VYDAJ`. Its schema fact accuracy is lower than B's. When B
+  abstained on the district columns (fs01, fs02), it still named the `district` table; C named
+  nothing. C also took the fs14 shortcut below.
+- **The path question fs14 (disp → account → loan) admits a shortcut.** `disp` and `loan` share
+  `account_id`, so A and C joined them directly. That answer is a valid join
+  (`disp.account_id = loan.account_id`) but is scored as a wrong path.
+- **`find_path` has a tie between client and account.** `client` reaches `account` with equal weight
+  through `disp` (ownership) and through `district` (same district), and `find_path` takes the
+  district route. That route is wrong in meaning. The question set avoids these pairs; the agent can
+  still meet them.
+
+Masking: no financial column matches the name patterns (email, phone, fax, address), so
+`client.birth_date` and partner account numbers are not masked. Mark them in Management · Masking if
+needed.
 
 ## Chat
 
