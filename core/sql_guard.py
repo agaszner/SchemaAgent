@@ -14,6 +14,7 @@ from sqlglot.errors import SqlglotError
 from sqlglot.optimizer.qualify import qualify
 from sqlglot.optimizer.scope import Scope, traverse_scope
 
+from core.parser import parse_database
 from core.profiler import _value, is_sensitive
 from core.sqlite import connect_readonly
 
@@ -30,7 +31,10 @@ def _fold(name: str) -> str:
 
 
 class GuardError(ValueError):
-    def __init__(self, kind: Literal["invalid", "execution", "timeout"], message: str):
+    """kind: "invalid" (refused before running), "execution" (SQLite rejected the query), "timeout",
+    or "database" (the file is missing, unreadable or changed since the parse: no rewrite of the query helps)."""
+
+    def __init__(self, kind: Literal["invalid", "execution", "timeout", "database"], message: str):
         super().__init__(message)
         self.kind = kind
 
@@ -170,7 +174,7 @@ def run_sql(db_path: str | Path, sql: str, model: dict, masked_columns: Iterable
     try:
         conn = connect_readonly(db_path)
     except sqlite3.Error as err:
-        raise GuardError("execution", str(err)) from err
+        raise GuardError("database", f"cannot open the database file: {err}") from err
     with closing(conn):
         # Never raise on bad UTF-8: CPython's error message would quote the (possibly masked) cell text.
         conn.text_factory = lambda b: b.decode("utf-8", "replace")
@@ -179,8 +183,8 @@ def run_sql(db_path: str | Path, sql: str, model: dict, masked_columns: Iterable
             cursor = conn.execute(check["sql"])
             columns = [d[0] for d in cursor.description]
             if len(columns) != check["width"]:
-                raise GuardError("execution", ("the query's output columns differ from the parsed schema; list the columns instead of *, "
-                                                "or run parse again if the database file changed"))
+                raise _failure(db_path, model, "the query's output columns differ from the parsed schema; "
+                                               "list the columns instead of *")
             # Fail closed on a same-width stale model: also mask by output name (patterns and user marks).
             masked = set(check["masked"]) | {i for i, name in enumerate(columns)
                                              if is_sensitive(name) or _fold(name) in marked}
@@ -188,6 +192,17 @@ def run_sql(db_path: str | Path, sql: str, model: dict, masked_columns: Iterable
         except sqlite3.Error as err:
             if fired:
                 raise GuardError("timeout", f"query took longer than {timeout_s:g} s") from err
-            raise GuardError("execution", str(err)) from err
+            raise _failure(db_path, model, str(err)) from err
     return {"sql": check["sql"], "columns": columns, "rows": rows, "masked": [columns[i] for i in sorted(masked)],
             "limited": check["capped"] and len(rows) == max_rows}
+
+
+def _failure(db_path: str | Path, model: dict, message: str) -> GuardError:
+    """Blame the query only if the file still matches the model; runs on the failure path, so the re-parse is free."""
+    try:
+        current = {t["name"]: [c["name"] for c in t["columns"]] for t in parse_database(db_path)["tables"]}
+    except (sqlite3.Error, SqlglotError) as err:
+        return GuardError("database", f"cannot read the database file: {err}")
+    if any(current.get(t["name"]) != [c["name"] for c in t["columns"]] for t in model["tables"]):
+        return GuardError("database", "the database changed since the last parse; run parse again")
+    return GuardError("execution", message)

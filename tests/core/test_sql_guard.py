@@ -1,4 +1,5 @@
 import copy
+import json
 import sqlite3
 from contextlib import closing
 
@@ -266,7 +267,7 @@ def test_stale_model_fails_closed():
     next(t for t in stale["tables"] if t["name"] == "Customer")["columns"].pop()  # SupportRepId
     with pytest.raises(GuardError, match="run parse again") as err:
         run_sql(DB, "SELECT * FROM Customer", stale)
-    assert err.value.kind == "execution"
+    assert err.value.kind == "database"
 
 
 def test_rendered_sql_keeps_sqlite_semantics():
@@ -313,9 +314,37 @@ def test_instant_failure_is_not_a_timeout():
     assert err.value.kind == "execution"
 
 
-def test_missing_database_is_an_execution_error(tmp_path):
+def test_missing_database_is_a_database_error(tmp_path):
     with pytest.raises(GuardError) as err:
         run_sql(tmp_path / "nope.db", "SELECT Name FROM Track", MODEL)
+    assert err.value.kind == "database"
+
+
+def test_non_database_file_is_a_database_error(tmp_path):
+    path = tmp_path / "x.db"
+    path.write_text("not a database")
+    with pytest.raises(GuardError) as err:
+        run_sql(path, "SELECT Name FROM Track", MODEL)
+    assert err.value.kind == "database"
+
+
+@pytest.mark.parametrize("change", ["DROP TABLE t", "ALTER TABLE t DROP COLUMN Note"])
+def test_schema_changed_since_parse_is_a_database_error(tmp_path, change):
+    path = tmp_path / "t.db"
+    with closing(sqlite3.connect(path)) as conn, conn:
+        conn.executescript("CREATE TABLE t (Id INTEGER, Note TEXT);")
+    model = parse_database(path)
+    with closing(sqlite3.connect(path)) as conn, conn:
+        conn.executescript(change)
+    with pytest.raises(GuardError, match="run parse again") as err:
+        run_sql(path, "SELECT Id, Note FROM t", model)
+    assert err.value.kind == "database"
+
+
+def test_query_errors_stay_execution_errors_with_a_stored_model():
+    stored = json.loads(json.dumps(MODEL))  # the API reads the model back from app.db as JSON
+    with pytest.raises(GuardError, match="no such function") as err:
+        run_sql(DB, "SELECT nosuchfunc(Name) FROM Track", stored)
     assert err.value.kind == "execution"
 
 
