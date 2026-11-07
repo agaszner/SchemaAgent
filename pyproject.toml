@@ -20,6 +20,8 @@ dev = [
 [tool.pytest.ini_options]
 pythonpath = ["."]
 addopts = "--import-mode=importlib"  # tests/api and tests/ui share file names
+# ui/views/chat.py passes timeout=180 per request; the UI tests route api_client through the TestClient
+filterwarnings = ["ignore:You should not use the 'timeout' argument with the TestClient"]
 
 [tool.fastapi]
 entrypoint = "api.main:app"

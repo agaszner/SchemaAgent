@@ -1,3 +1,5 @@
+import copy
+import json
 import shutil
 import sqlite3
 from contextlib import closing
@@ -13,17 +15,28 @@ from api.main import app
 
 
 class FakeOpenAI:
-    """Stands in for openai.OpenAI: responses.parse answers every table with a fixed summary and no column docs."""
+    """Stands in for openai.OpenAI: responses.parse answers every table with a fixed summary and no column docs.
+
+    script: each item is one reply, used before `reply`: a list of (tool_name, arguments) is one round of
+    function calls (a str is sent as raw arguments), a dict is the parsed final answer, None a final answer the model refused (output_parsed None).
+    """
 
     def __init__(self):
         self.calls: list[dict] = []
         self.reply = {"summary": "Fake summary.", "columns": []}
+        self.script: list = []
         self.responses = self
 
     def parse(self, **kwargs):
-        self.calls.append(kwargs)
-        doc = kwargs["text_format"].model_validate(self.reply)
-        return SimpleNamespace(output_parsed=doc, usage=SimpleNamespace(input_tokens=100, output_tokens=20))
+        self.calls.append({**kwargs, "input": copy.deepcopy(kwargs["input"])})  # the agent appends to its list
+        reply = self.script.pop(0) if self.script else self.reply
+        usage = SimpleNamespace(input_tokens=100, output_tokens=20)
+        if isinstance(reply, list):
+            calls = [SimpleNamespace(type="function_call", name=n, arguments=a if isinstance(a, str) else json.dumps(a), call_id=f"call_{i}")
+                     for i, (n, a) in enumerate(reply)]
+            return SimpleNamespace(output=calls, output_parsed=None, usage=usage)
+        parsed = None if reply is None else kwargs["text_format"].model_validate(reply)
+        return SimpleNamespace(output=[SimpleNamespace(type="message")], output_parsed=parsed, usage=usage)
 
 
 @pytest.fixture

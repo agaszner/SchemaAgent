@@ -27,6 +27,7 @@ Then open http://localhost:8501. In **Management**, register `data/chinook.db`
 (the sample database in the repo), then press **Run all steps** on the Home page.
 Review, edit and export the table descriptions in Management · Documentation.
 The **Explorer** page then browses tables and runs read-only queries in its SQL tab.
+The **Chat** page answers questions about the database.
 
 `make dev` runs both servers in one terminal and Ctrl-C stops both. To run them
 in separate terminals, use `make api` and `make ui`.
@@ -77,9 +78,10 @@ core/                 pipeline logic, no HTTP and no UI
   sql_guard.py        SQL guard: SELECT only, LIMIT, timeout, masking
   documentation.py    LLM table documentation prompts, validation, export
   evaluation.py       benchmark contexts (A, B, C), answer scoring, metrics
+  agent.py            chat agent: tool loop, evidence, repair retry
 api/                  FastAPI app
   main.py config.py   app and settings
-  routes/             HTTP routes: databases, pipeline, relationships, tables, sql, settings, docs, benchmark
+  routes/             HTTP routes: databases, pipeline, relationships, tables, sql, settings, docs, benchmark, chat
   payloads.py         request and response models
   appdb.py            app.db access
   jobs.py             runs pipeline steps in the background
@@ -87,7 +89,7 @@ api/                  FastAPI app
 ui/                   Streamlit UI
   main.py             entry point: theme, sidebar, navigation
   api_client.py       HTTP client for api/
-  views/              pages: home, pipeline, explorer, management (+ management_tabs/)
+  views/              pages: home, pipeline, explorer, chat, management (+ management_tabs/)
   markup.py           HTML builders and formatters
   widgets.py          Streamlit pieces shared by several pages
   network.py          pyvis relationship graph
@@ -123,6 +125,29 @@ per (config, question) to `benchmark/results.csv` (`SCHEMASAGE_BENCHMARK_DIR`).
 - **Mean latency, tokens, cost**: mean wall time per question, and summed tokens and cost per config.
 
 A refused answer counts as wrong.
+
+## Chat
+
+The Chat page (after Explorer) answers questions about the selected database. It needs
+parse, profile and graph done (otherwise 409) and `OPENAI_API_KEY` (otherwise 503).
+
+The agent has five tools: `search_tables`, `get_table_doc`, `find_path`, `get_sample_rows`
+and `run_sql`. It is a plain tool loop on the OpenAI Responses API (`core/agent.py`, at most
+8 rounds, the last 3 turns as history). The spec names the OpenAI Agents SDK; this project does not
+use it because the code base is sync (sync OpenAI client, sync routes, a sync fake in tests)
+and the SDK expects `AsyncOpenAI`.
+
+- Each answer is one of: data, schema, not enough information, refused, failed.
+- The evidence (SQL, result, JOIN steps, assumed relationships, tool calls, names the
+  answer mentions that do not exist) comes from the tool trace, not from the model.
+- `proposed` relationships are used but flagged as assumed: when `find_path` returns one, or when a
+  successful query reads both of its tables. `rejected` ones never reach the model through the docs
+  or `find_path`; a join the model writes on its own over a rejected pair is not blocked.
+- A failed query gets one repair retry; after a second failure, or if the database itself fails,
+  `run_sql` stops running for that turn.
+- Write requests are refused, in the instructions and again by the SQL guard.
+- The log is kept in app.db and each answer takes a thumbs up or down. Marking a new column clears the log.
+- Each answer shows latency, tokens and cost.
 
 ## Safety rules
 

@@ -28,6 +28,16 @@ def require_database() -> dict:
     return db
 
 
+def unique_names(names: list[str]) -> list[str]:
+    """SQL result columns as distinct names ("Name", "Name (2)"): a dict or Arrow table keeps one per name."""
+    seen: dict[str, int] = {}
+    out = []
+    for n in names:
+        seen[n] = seen.get(n, 0) + 1
+        out.append(n if seen[n] == 1 else f"{n} ({seen[n]})")
+    return out
+
+
 def databases_table() -> None:
     # ponytail: two requests per database; fine for a handful of databases
     rows = []

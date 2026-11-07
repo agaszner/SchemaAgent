@@ -106,4 +106,7 @@ def set_masking(body: MaskingIn, db: Database, conn: Conn) -> dict:
     gained = {mark.table for mark in body.columns if mark.model_dump() not in old_marks}
     conn.executemany("DELETE FROM table_docs WHERE database_id = ? AND table_name = ?",
                      [(db["id"], table) for table in gained])
+    # Past answers may quote values of the newly marked columns, and they feed the next turns as history
+    if gained:
+        conn.execute("DELETE FROM chat_messages WHERE database_id = ?", (db["id"],))
     return dict(row)

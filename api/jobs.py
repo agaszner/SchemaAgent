@@ -7,7 +7,8 @@ from collections.abc import Callable
 from contextlib import closing
 
 from api import llm
-from api.appdb import NOW, NotReady, connect, latest_result, load_graph, load_relationships, read_app_settings
+from api.appdb import (NOW, NotReady, connect, latest_result, llm_params, load_relationships, load_sources,
+                       read_app_settings)
 from api.config import settings
 from core.documentation import doc_basis, document_table
 from core.evaluation import CONFIGS, load_gold, load_questions, raw_ddl, run_question, summarize
@@ -139,18 +140,8 @@ def benchmark(conn: sqlite3.Connection, run: sqlite3.Row) -> dict:
     questions = benchmark_questions(run["name"])
     gold = load_gold(settings.benchmark_dir / "gold.sql")
     app = read_app_settings(conn)
-    sources = {
-        "ddl": raw_ddl(run["path"]),
-        "model": latest_result(conn, db, "parse"),
-        "docs": {r["table_name"]: {"summary": r["summary"], "columns": r["columns"]} for r in conn.execute(
-            "SELECT table_name, summary, columns FROM table_docs WHERE database_id = ?", (db,))},
-        "relationships": load_relationships(conn, db),
-        "profile": latest_result(conn, db, "profile"),  # masked
-        "graph": load_graph(conn, db),
-    }
-    params = {"model": app.llm_model, "effort": app.reasoning_effort, "max_rows": app.max_rows,
-              "timeout_s": app.timeout_s, "input_usd_per_mtok": app.input_usd_per_mtok,
-              "output_usd_per_mtok": app.output_usd_per_mtok}
+    sources = {**load_sources(conn, db), "ddl": raw_ddl(run["path"])}
+    params = llm_params(app)
     marks = [(m["table"], m["column"]) for m in run["masked_columns"]]  # tuples, as in profile()
     for q in questions:  # a broken gold fails the run before any LLM call, not after half the budget
         if q["id"] in gold:

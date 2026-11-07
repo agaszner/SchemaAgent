@@ -100,15 +100,6 @@ def profile_rows(table: dict, stats: dict) -> list[dict]:
     return rows
 
 
-def unique_names(names: list[str]) -> list[str]:
-    seen: dict[str, int] = {}
-    out = []
-    for n in names:
-        seen[n] = seen.get(n, 0) + 1
-        out.append(n if seen[n] == 1 else f"{n} ({seen[n]})")
-    return out
-
-
 def render_sql(db: dict, table: dict) -> None:
     with st.form("sql_form", border=False):
         text = st.text_area("SQL", key="sql:text", placeholder=f'SELECT * FROM "{table["name"]}"')
@@ -127,7 +118,7 @@ def render_sql(db: dict, table: dict) -> None:
         st.error(result)
         return
     st.code(result["sql"], language="sql")
-    names = unique_names(result["columns"])
+    names = widgets.unique_names(result["columns"])
     st.dataframe([dict(zip(names, row)) for row in result["rows"]] or {name: [] for name in names}, hide_index=True)
     note = [f"{len(result['rows']):,} rows"]
     if result["limited"]:

@@ -82,6 +82,22 @@ CREATE TABLE IF NOT EXISTS table_docs (
     UNIQUE (database_id, table_name)
 );
 
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id INTEGER PRIMARY KEY,
+    database_id INTEGER NOT NULL REFERENCES databases (id),
+    question TEXT NOT NULL,
+    kind TEXT NOT NULL CHECK (kind IN ('data', 'schema', 'abstain', 'refuse', 'failed')),
+    answer TEXT NOT NULL,
+    evidence JSON NOT NULL,   -- the turn dict minus kind, answer, tokens, cost and latency
+    llm_model TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    cost_usd REAL NOT NULL,
+    latency_s REAL NOT NULL,
+    feedback TEXT CHECK (feedback IN ('up', 'down')),
+    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
 -- one row of user settings as JSON; missing keys take AppSettings defaults, so new settings need no migration
 CREATE TABLE IF NOT EXISTS app_settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -144,6 +160,25 @@ def load_relationships(conn: sqlite3.Connection, database_id: int) -> list[dict]
     return [dict(r) for r in conn.execute(
         "SELECT from_table, from_columns, to_table, to_columns, source, status, confidence FROM relationships"
         " WHERE database_id = ? ORDER BY id", (database_id,))]
+
+
+def load_sources(conn: sqlite3.Connection, database_id: int) -> dict:
+    """What the agent and the benchmark read: the model, the masked profile, docs, relationships and the graph."""
+    return {
+        "model": latest_result(conn, database_id, "parse"),
+        "profile": latest_result(conn, database_id, "profile"),  # masked
+        "docs": {r["table_name"]: {"summary": r["summary"], "columns": r["columns"], "status": r["status"]}
+                 for r in conn.execute("SELECT table_name, summary, columns, status FROM table_docs"
+                                       " WHERE database_id = ?", (database_id,))},
+        "relationships": load_relationships(conn, database_id),
+        "graph": load_graph(conn, database_id),
+    }
+
+
+def llm_params(app: AppSettings) -> dict:
+    return {"model": app.llm_model, "effort": app.reasoning_effort, "max_rows": app.max_rows,
+            "timeout_s": app.timeout_s, "input_usd_per_mtok": app.input_usd_per_mtok,
+            "output_usd_per_mtok": app.output_usd_per_mtok}
 
 
 def read_app_settings(conn: sqlite3.Connection) -> AppSettings:

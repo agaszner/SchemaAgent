@@ -155,3 +155,26 @@ class BenchmarkOut(BaseModel):
     run: RunOut
     summary: dict | None  # {config: metrics} once the run is done
     rows: list[dict]      # one per (config, question), as in results.csv
+
+
+class ChatIn(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
+
+
+class ChatOut(BaseModel):
+    id: int
+    question: str
+    kind: Literal["data", "schema", "abstain", "refuse", "failed"]
+    answer: str
+    evidence: dict  # the turn dict minus kind, answer, tokens, cost and latency
+    llm_model: str
+    input_tokens: int
+    output_tokens: int
+    cost_usd: float
+    latency_s: float
+    feedback: Literal["up", "down"] | None
+    created_at: datetime
+
+
+class FeedbackIn(BaseModel):
+    feedback: Literal["up", "down"] | None

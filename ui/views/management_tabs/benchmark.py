@@ -62,8 +62,8 @@ def render(db: dict | None) -> None:
         if bench_active and run["status"] not in ACTIVE:
             st.rerun()  # finished: show the table and enable the button
         if run["status"] in ACTIVE:
-            st.progress(run["done"] / run["total"] if run["total"] else 0.0,
-                        text=f"{run['done']:,} / {run['total']:,} questions")
+            done, total = run["done"] or 0, run["total"] or 0  # both NULL until the first progress write
+            st.progress(done / total if total else 0.0, text=f"{done:,} / {total:,} questions")
             return
         if run["status"] == "error":
             st.error(run["error"])
