@@ -1,9 +1,9 @@
 import streamlit as st
 
-from ui.views.management_tabs import databases, masking, relationships, settings
+from ui.views.management_tabs import databases, documentation, masking, relationships, settings
 from ui.widgets import current_database
 
-TABS = {"Relationships": relationships.render, "Databases": databases.render, "Masking": masking.render,
+TABS = {"Relationships": relationships.render, "Documentation": documentation.render, "Databases": databases.render, "Masking": masking.render,
         "Settings": settings.render}
 
 db = current_database()

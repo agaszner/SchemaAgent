@@ -2,20 +2,44 @@ import shutil
 import sqlite3
 from contextlib import closing
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 
+from api import llm
 from api.config import settings
 from api.main import app
 
 
+class FakeOpenAI:
+    """Stands in for openai.OpenAI: responses.parse answers every table with a fixed summary and no column docs."""
+
+    def __init__(self):
+        self.calls: list[dict] = []
+        self.reply = {"summary": "Fake summary.", "columns": []}
+        self.responses = self
+
+    def parse(self, **kwargs):
+        self.calls.append(kwargs)
+        doc = kwargs["text_format"].model_validate(self.reply)
+        return SimpleNamespace(output_parsed=doc, usage=SimpleNamespace(input_tokens=100, output_tokens=20))
+
+
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def fake_llm(monkeypatch):
+    fake = FakeOpenAI()
+    monkeypatch.setattr(llm, "client", lambda: fake)
+    return fake
+
+
+@pytest.fixture
+def client(tmp_path, monkeypatch, fake_llm):
     """Fresh app.db; tmp_path is the data dir and holds a copy of chinook.db."""
     shutil.copy("data/chinook.db", tmp_path / "chinook.db")
     monkeypatch.setattr(settings, "app_db", tmp_path / "app.db")
     monkeypatch.setattr(settings, "data_dir", tmp_path)
+    monkeypatch.setattr(settings, "export_dir", tmp_path / "export")
     with TestClient(app) as c:  # runs the lifespan, so init_db creates the schema
         yield c
 
@@ -45,6 +69,20 @@ def shop_db(tmp_path) -> Path:
 def shop(client, shop_db) -> int:
     db = client.post("/api/databases", json={"path": str(shop_db)}).json()["id"]
     client.post(f"/api/databases/{db}/runs", json={"step": "all"})
+    return db
+
+
+@pytest.fixture
+def parse_only_change(client, tmp_path) -> int:
+    """A and B fully run; then B is dropped, C added, and only parse re-run: B's doc is orphaned, C has no profile."""
+    path = tmp_path / "ab.db"
+    with closing(sqlite3.connect(path)) as conn:
+        conn.executescript("CREATE TABLE A (id INTEGER PRIMARY KEY); CREATE TABLE B (id INTEGER PRIMARY KEY);")
+    db = client.post("/api/databases", json={"path": str(path)}).json()["id"]
+    client.post(f"/api/databases/{db}/runs", json={"step": "all"})
+    with closing(sqlite3.connect(path)) as conn:
+        conn.executescript("DROP TABLE B; CREATE TABLE C (id INTEGER PRIMARY KEY);")
+    client.post(f"/api/databases/{db}/runs", json={"step": "parse"})
     return db
 
 

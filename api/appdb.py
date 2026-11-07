@@ -66,6 +66,22 @@ CREATE TABLE IF NOT EXISTS relationship_log (
     at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
+CREATE TABLE IF NOT EXISTS table_docs (
+    id INTEGER PRIMARY KEY,
+    database_id INTEGER NOT NULL REFERENCES databases (id),
+    table_name TEXT NOT NULL,
+    summary TEXT NOT NULL,
+    columns JSON NOT NULL,          -- [{"name", "description", "certainty"}] in model column order
+    status TEXT NOT NULL CHECK (status IN ('generated', 'edited', 'approved')),
+    basis JSON NOT NULL,            -- doc_basis() when last written; a different current basis means stale
+    llm_model TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    cost_usd REAL NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    UNIQUE (database_id, table_name)
+);
+
 -- one row of user settings as JSON; missing keys take AppSettings defaults, so new settings need no migration
 CREATE TABLE IF NOT EXISTS app_settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -121,6 +137,13 @@ def load_graph(conn: sqlite3.Connection, database_id: int) -> nx.MultiDiGraph:
                "ref_columns": row["to_columns"], "confidence": row["confidence"]}
         add_relation(graph, rel, source=row["source"], status=row["status"])
     return graph
+
+
+def load_relationships(conn: sqlite3.Connection, database_id: int) -> list[dict]:
+    """Relationships as the plain dicts core.documentation reads."""
+    return [dict(r) for r in conn.execute(
+        "SELECT from_table, from_columns, to_table, to_columns, source, status, confidence FROM relationships"
+        " WHERE database_id = ? ORDER BY id", (database_id,))]
 
 
 def read_app_settings(conn: sqlite3.Connection) -> AppSettings:

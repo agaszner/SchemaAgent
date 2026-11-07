@@ -1,11 +1,13 @@
-"""Pipeline steps (parse -> profile -> graph) and their background execution."""
+"""Pipeline steps (parse -> profile -> graph -> docs) and their background execution."""
 
 import logging
 import sqlite3
 from collections.abc import Callable
 from contextlib import closing
 
-from api.appdb import NOW, connect, latest_result
+from api import llm
+from api.appdb import NOW, NotReady, connect, latest_result, load_relationships, read_app_settings
+from core.documentation import doc_basis, document_table
 from core.parser import parse_database
 from core.profiler import profile_database
 
@@ -54,8 +56,55 @@ def graph(conn: sqlite3.Connection, run: sqlite3.Row) -> dict:
     return {"declared": len(declared), "inferred": len(inferred)}  # found, not inserted: re-runs insert nothing
 
 
+def docs(conn: sqlite3.Connection, run: sqlite3.Row) -> dict:
+    """Document tables with no doc and stale generated ones; edited and approved docs are never touched."""
+    db = run["database_id"]
+    tables = latest_result(conn, db, "parse")["tables"]
+    profiles = {p["table"]: p for p in latest_result(conn, db, "profile")["tables"]}
+    app = read_app_settings(conn)
+    rels = load_relationships(conn, db)
+    existing = {r["table_name"]: r for r in conn.execute(
+        "SELECT table_name, status, basis FROM table_docs WHERE database_id = ?", (db,))}
+    names = {t["name"] for t in tables}
+    conn.executemany("DELETE FROM table_docs WHERE database_id = ? AND table_name = ?",
+                     [(db, name) for name in existing if name not in names])
+    todo = [t for t in tables if t["name"] not in existing
+            or (existing[t["name"]]["status"] == "generated" and existing[t["name"]]["basis"] != doc_basis(t, rels))]
+    if any(t["name"] not in profiles for t in todo):  # parse re-run alone after the tables changed
+        raise NotReady("run profile first")
+    result = {"done": 0, "total": len(todo), "input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0}
+
+    def progress() -> None:
+        conn.execute("UPDATE runs SET result = ? WHERE id = ?", (result, run["run_id"]))
+        conn.commit()  # no write transaction stays open while the LLM answers, so relationship edits don't lock
+
+    progress()
+    client = llm.client() if todo else None  # nothing to do needs no key
+    for table in todo:
+        doc, usage = document_table(client, table, profiles[table["name"]], rels,
+                                    model=app.llm_model, effort=app.reasoning_effort)
+        cost = (usage["input_tokens"] * app.input_usd_per_mtok + usage["output_tokens"] * app.output_usd_per_mtok) / 1e6
+        conn.execute(
+            "INSERT INTO table_docs (database_id, table_name, summary, columns, status, basis, llm_model,"
+            " input_tokens, output_tokens, cost_usd) VALUES (?, ?, ?, ?, 'generated', ?, ?, ?, ?, ?)"
+            " ON CONFLICT (database_id, table_name) DO UPDATE SET summary = excluded.summary,"
+            " columns = excluded.columns, status = excluded.status, basis = excluded.basis,"
+            " llm_model = excluded.llm_model, input_tokens = excluded.input_tokens,"
+            f" output_tokens = excluded.output_tokens, cost_usd = excluded.cost_usd, updated_at = {NOW}"
+            " WHERE table_docs.status = 'generated'",  # a person's PUT during the run wins
+            (db, table["name"], doc["summary"], doc["columns"], doc_basis(table, rels), app.llm_model,
+             usage["input_tokens"], usage["output_tokens"], cost),
+        )
+        result["done"] += 1
+        result["input_tokens"] += usage["input_tokens"]
+        result["output_tokens"] += usage["output_tokens"]
+        result["cost_usd"] += cost
+        progress()
+    return result
+
+
 STEPS: dict[str, Callable[[sqlite3.Connection, sqlite3.Row], dict]] = {
-    "parse": parse, "profile": profile, "graph": graph,
+    "parse": parse, "profile": profile, "graph": graph, "docs": docs,
 }
 
 
@@ -84,12 +133,12 @@ def execute(run_ids: list[int]) -> None:
         for i, run_id in enumerate(run_ids):
             try:
                 run = conn.execute(
-                    "SELECT step, database_id, path, masked_columns FROM runs"
+                    "SELECT runs.id AS run_id, step, database_id, path, masked_columns FROM runs"
                     " JOIN databases ON databases.id = runs.database_id WHERE runs.id = ?",
                     (run_id,),
                 ).fetchone()
                 # The step's writes, marking it done, and starting the next step commit together,
-                # so no other pipeline can grab the database between two steps.
+                # so no other pipeline can grab the database between two steps (the docs step also commits per table).
                 with conn:
                     result = STEPS[run["step"]](conn, run)
                     conn.execute(f"UPDATE runs SET status = 'done', result = ?, finished_at = {NOW} WHERE id = ?",

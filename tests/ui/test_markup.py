@@ -43,3 +43,10 @@ def test_counts_summarise_model_and_relationships(client, chinook, shop):
     assert counts(shop) == [("Tables", "2", ""), ("Columns", "6", ""), ("Declared FKs", "0", ""),
                             ("Inferred edges", "2", "/ 2 to review")]
     assert markup.counts(None, [])[0] == ("Tables", "—", "")
+
+
+def test_steps_table_shows_docs_progress():
+    run = {"step": "docs", "status": "running", "error": None, "started_at": None, "duration_s": None,
+           "has_result": False, "done": 3, "total": 11}
+    assert "3 / 11 tables" in markup.steps_table([run])
+    assert "tables</" not in markup.steps_table([{**run, "status": "done", "done": None, "total": None}])

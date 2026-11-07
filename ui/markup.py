@@ -11,6 +11,7 @@ STEPS: list[tuple[str, str, str]] = [
     ("parse", "Parse", "DDL → JSON (sqlglot)"),
     ("profile", "Profile", "statistics, sample rows, masking"),
     ("graph", "Graph", "declared and value-based relationships"),
+    ("docs", "Docs", "LLM table and column descriptions"),
 ]
 
 RUN_LABEL: dict[str | None, tuple[str, str]] = {
@@ -53,7 +54,7 @@ def ident(name: str) -> str:
     return f'<span class="ss-ident">{escape(name)}</span>'
 
 
-def counts(model: dict | None, relationships: list[dict]) -> list[tuple[str, str, str]]:
+def counts(model: dict | None, relationships: list[dict], docs: list[dict] | None = None) -> list[tuple[str, str, str]]:
     """StatStrip items: label, value, small text."""
     values = ["—"] * 3
     if model:
@@ -63,7 +64,10 @@ def counts(model: dict | None, relationships: list[dict]) -> list[tuple[str, str
     inferred = sum(r["source"] == "inferred" and r["status"] != "rejected" for r in relationships)
     proposed = sum(r["status"] == "proposed" for r in relationships)
     items = [(label, value, "") for label, value in zip(("Tables", "Columns", "Declared FKs"), values)]
-    return [*items, ("Inferred edges", f"{inferred:,}", f"/ {proposed:,} to review")]
+    items.append(("Inferred edges", f"{inferred:,}", f"/ {proposed:,} to review"))
+    if docs is not None:
+        items.append(("Docs cost", f"${sum(d['cost_usd'] for d in docs):,.4f}", f"{len(docs):,} tables"))
+    return items
 
 
 def stats(items: list[tuple[str, str, str]]) -> str:
@@ -81,6 +85,8 @@ def steps_table(runs: list[dict]) -> str:
         run = latest.get(step)
         error = f'<span class="err">{escape(run["error"])}</span>' if run and run["error"] else ""
         running = ' class="is-running"' if run and run["status"] == "running" else ""
+        if run and run["status"] == "running" and run.get("total"):
+            error += f'<small>{run["done"]:,} / {run["total"]:,} tables</small>'
         rows.append(
             f'<tr{running}><td class="step">{escape(name)}<small>{escape(description)}</small>{error}</td>'
             f"<td>{tag(*run_label(run))}</td>"

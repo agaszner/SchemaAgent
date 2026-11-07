@@ -89,6 +89,7 @@ def set_masking(body: MaskingIn, db: Database, conn: Conn) -> dict:
     in_progress = "SELECT 1 FROM runs WHERE database_id = ? AND status IN ('queued', 'running') LIMIT 1"
     if conn.execute(in_progress, (db["id"],)).fetchone():
         raise HTTPException(409, "a pipeline run is in progress")
+    old_marks = conn.execute("SELECT masked_columns FROM databases WHERE id = ?", (db["id"],)).fetchone()[0]
     # Exact, case-sensitive model names: profile_database matches marks exactly, so every stored mark applies
     model = latest_result(conn, db["id"], "parse")
     known = {t["name"]: {c["name"] for c in t["columns"]} for t in model["tables"]}
@@ -101,4 +102,8 @@ def set_masking(body: MaskingIn, db: Database, conn: Conn) -> dict:
     ).fetchone()
     # The cached profiles hold the newly marked columns' raw values; GET /profile answers 409 until a re-run
     conn.execute("UPDATE runs SET result = NULL WHERE database_id = ? AND step = 'profile'", (db["id"],))
+    # Docs of a table that gained a mark were written from its raw values; removing a mark deletes nothing
+    gained = {mark.table for mark in body.columns if mark.model_dump() not in old_marks}
+    conn.executemany("DELETE FROM table_docs WHERE database_id = ? AND table_name = ?",
+                     [(db["id"], table) for table in gained])
     return dict(row)

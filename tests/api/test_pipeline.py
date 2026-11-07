@@ -20,8 +20,9 @@ def _relationships(database_id):
 def test_full_run_builds_model_profile_and_relationships(client, chinook):
     runs = client.get(f"/api/databases/{chinook}/runs").json()
     assert [(r["step"], r["status"], r["error"]) for r in runs] == [
-        ("graph", "done", None), ("profile", "done", None), ("parse", "done", None)]
+        ("docs", "done", None), ("graph", "done", None), ("profile", "done", None), ("parse", "done", None)]
     assert all(r["duration_s"] >= 0 for r in runs)
+    assert [r["done"] for r in runs] == [11, None, None, None]
     assert len(client.get(f"/api/databases/{chinook}/model").json()["tables"]) == 11
     assert "@" not in json.dumps(client.get(f"/api/databases/{chinook}/profile").json())
     with closing(sqlite3.connect(settings.app_db)) as conn:
@@ -34,11 +35,11 @@ def test_steps_need_their_prerequisites(client, tmp_path):
     r = client.post(f"/api/databases/{db}/runs", json={"step": "graph"})
     assert r.status_code == 409 and r.json()["detail"] == "run parse first"
     assert client.get(f"/api/databases/{db}/model").status_code == 409
-    assert client.post(f"/api/databases/{db}/runs", json={"step": "docs"}).status_code == 422
+    assert client.post(f"/api/databases/{db}/runs", json={"step": "nope"}).status_code == 422
     r = client.post(f"/api/databases/{db}/runs", json={"step": "all"})
     assert r.status_code == 202
     assert [(x["step"], x["status"]) for x in r.json()] == [
-        ("parse", "running"), ("profile", "queued"), ("graph", "queued")]
+        ("parse", "running"), ("profile", "queued"), ("graph", "queued"), ("docs", "queued")]
 
 
 def test_only_one_pipeline_runs_per_database(client, chinook):
@@ -50,10 +51,10 @@ def test_failed_step_records_error_and_skips_the_rest(client, tmp_path):
     db = client.post("/api/databases", json={"path": str(tmp_path / "chinook.db")}).json()["id"]
     (tmp_path / "chinook.db").write_bytes(b"no longer a database")
     client.post(f"/api/databases/{db}/runs", json={"step": "all"})
-    parse, profile, graph = reversed(client.get(f"/api/databases/{db}/runs").json())
+    parse, *later = reversed(client.get(f"/api/databases/{db}/runs").json())
     assert parse["status"] == "error" and parse["error"].startswith("DatabaseError")
-    assert (profile["status"], profile["error"]) == ("error", "skipped: parse failed")
-    assert (graph["status"], graph["error"]) == ("error", "skipped: parse failed")
+    assert [(r["step"], r["status"], r["error"]) for r in later] == [
+        (step, "error", "skipped: parse failed") for step in ("profile", "graph", "docs")]
 
 
 def test_restart_marks_unfinished_runs_interrupted(client, chinook):
@@ -67,7 +68,7 @@ def test_rerun_seeds_each_candidate_once(client, shop):
     seeded = _relationships(shop)
     assert [r[1:] for r in seeded] == [("inferred", "proposed", 1.0), ("inferred", "proposed", 0.8)]
     assert client.post(f"/api/databases/{shop}/runs", json={"step": "all"}).status_code == 202
-    graph = client.get(f"/api/databases/{shop}/runs").json()[0]
+    graph = client.get(f"/api/databases/{shop}/runs").json()[1]
     assert (graph["step"], graph["status"]) == ("graph", "done")  # the stored pairs did not fail the step
     assert _relationships(shop) == seeded
 

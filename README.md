@@ -15,12 +15,17 @@ and serves all of it through a FastAPI backend and a Streamlit UI.
 ## Quick start
 
 ```bash
-make install   # install dependencies
-make dev       # start the API and the UI together
+make install                               # install dependencies
+echo 'OPENAI_API_KEY=sk-...' >> .env       # the Docs step calls the OpenAI API
+make dev                                   # start the API and the UI together
 ```
+
+Put the key in `.env` before `make dev`: the API reads it at startup, and without it the
+Docs step of **Run all steps** fails (the other steps still finish).
 
 Then open http://localhost:8501. In **Management**, register `data/chinook.db`
 (the sample database in the repo), then press **Run all steps** on the Home page.
+Review, edit and export the table descriptions in Management · Documentation.
 The **Explorer** page then browses tables and runs read-only queries in its SQL tab.
 
 `make dev` runs both servers in one terminal and Ctrl-C stops both. To run them
@@ -49,8 +54,10 @@ Set these as environment variables or in a `.env` file at the repo root.
 | `SCHEMASAGE_APP_DB` | `app.db` | SQLite file for the app state (registered databases, runs, relationships) |
 | `SCHEMASAGE_DATA_DIR` | `data` | Only databases inside this folder can be registered |
 | `SCHEMASAGE_API_URL` | `http://127.0.0.1:8000` | Where the UI finds the API |
+| `SCHEMASAGE_EXPORT_DIR` | `docs` | Where Export Markdown writes `tables/<Table>.md` and `schema_overview.md` |
+| `OPENAI_API_KEY` | none | OpenAI API key; the Docs step needs it |
 
-The SQL row limit and query timeout are set in Management · Settings (stored in app.db).
+The SQL row limit, query timeout, LLM model, reasoning effort and token prices are set in Management · Settings (stored in app.db).
 
 ## Command-line tools
 
@@ -68,12 +75,14 @@ core/                 pipeline logic, no HTTP and no UI
   graph.py            relationship graph and JOIN paths
   sqlite.py           read-only connections, identifier quoting
   sql_guard.py        SQL guard: SELECT only, LIMIT, timeout, masking
+  documentation.py    LLM table documentation prompts, validation, export
 api/                  FastAPI app
   main.py config.py   app and settings
-  routes/             HTTP routes: databases, pipeline, relationships, tables, sql, settings
+  routes/             HTTP routes: databases, pipeline, relationships, tables, sql, settings, docs
   payloads.py         request and response models
   appdb.py            app.db access
   jobs.py             runs pipeline steps in the background
+  llm.py              OpenAI client
 ui/                   Streamlit UI
   main.py             entry point: theme, sidebar, navigation
   api_client.py       HTTP client for api/
@@ -86,7 +95,7 @@ tests/                pytest suite mirroring core/, api/ and ui/
 data/                 sample databases (only chinook.db is in git)
 ```
 
-The pipeline runs parse, then profile, then graph. `api/` calls the
+The pipeline runs parse, then profile, then graph, then docs. `api/` calls the
 `core/` functions; the UI reaches them only over HTTP. App state lives in `app.db`, separate from the databases
 being analysed.
 
@@ -95,7 +104,7 @@ being analysed.
 - Analysed databases are always opened read-only.
 - Table and column names are quoted, and values are passed as bound parameters.
 - Columns that look like personal data are masked (`***`) before any value
-  could reach an LLM.
+  could reach an LLM. Documentation prompts are built only from the masked profile.
 - SQL runs only after sqlglot validation: one SELECT over known tables and columns,
   with a row limit and a timeout. Masked columns can only be selected (their values
   come back as `***`), never filtered, joined, sorted or grouped on.

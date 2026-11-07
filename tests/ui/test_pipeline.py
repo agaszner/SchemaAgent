@@ -15,10 +15,10 @@ def _steps(at):
 def test_pipeline_runs_every_step_and_logs_runs(ui, client, tmp_path):
     db = client.post("/api/databases", json={"path": str(tmp_path / "chinook.db")}).json()["id"]
     at = ui("views/pipeline.py", database_id=db)
-    assert _steps(at).count(">not run<") == 3
+    assert _steps(at).count(">not run<") == 4
     at.button(key="run:all").click().run()
-    assert _steps(at).count(">done<") == 3
-    assert [line.split()[1] for line in at.code[0].value.splitlines()] == ["graph", "profile", "parse"]
+    assert _steps(at).count(">done<") == 4
+    assert [line.split()[1] for line in at.code[0].value.splitlines()] == ["docs", "graph", "profile", "parse"]
 
 
 def test_pipeline_shows_refusals_and_locks_while_running(ui, client, tmp_path):
@@ -30,7 +30,7 @@ def test_pipeline_shows_refusals_and_locks_while_running(ui, client, tmp_path):
         conn.execute("INSERT INTO runs (database_id, step, status) VALUES (?, 'parse', 'running')", (db,))
     at.run()
     assert ">running<" in _steps(at)
-    assert all(at.button(key=k).disabled for k in ["run:all", "run:parse", "run:profile", "run:graph"])
+    assert all(at.button(key=k).disabled for k in ["run:all", "run:parse", "run:profile", "run:graph", "run:docs"])
 
 
 def test_pipeline_without_databases_shows_empty_state(ui):
@@ -108,3 +108,10 @@ def test_pipeline_draws_graph_with_legend(ui, chinook):
     at = ui("views/pipeline.py", database_id=chinook)
     assert len(at.get("iframe")) == 1
     assert "declared FK" in next(h.value for h in at.html if "ss-legend" in h.value)
+
+
+def test_pipeline_shows_docs_step_and_cost(ui, chinook):
+    at = ui("views/pipeline.py", database_id=chinook)
+    assert _steps(at).count(">done<") == 4 and "run:docs" in {b.key for b in at.button}
+    stats = next(h.value for h in at.html if "ss-stats" in h.value)
+    assert "Docs cost" in stats and "$0.0002" in stats and "11 tables" in stats

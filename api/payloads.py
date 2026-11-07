@@ -27,7 +27,7 @@ class DatabaseOut(BaseModel):
 
 
 class RunIn(BaseModel):
-    step: Literal["parse", "profile", "graph", "all"]
+    step: Literal["parse", "profile", "graph", "docs", "all"]
 
 
 class RunOut(BaseModel):
@@ -39,6 +39,8 @@ class RunOut(BaseModel):
     duration_s: float | None
     error: str | None
     has_result: bool
+    done: int | None  # docs progress; NULL for other steps
+    total: int | None
 
 
 class MaskingIn(BaseModel):
@@ -110,7 +112,40 @@ class RelationshipCheck(BaseModel):
 class AppSettings(BaseModel):
     max_rows: int = Field(DEFAULT_MAX_ROWS, ge=1, le=1000)
     timeout_s: float = Field(DEFAULT_TIMEOUT_S, ge=0.1, le=60)
+    llm_model: str = Field("gpt-6-luna", min_length=1)
+    reasoning_effort: Literal["none", "low", "medium", "high"] = "low"
+    input_usd_per_mtok: float = Field(0.10, ge=0)
+    output_usd_per_mtok: float = Field(0.50, ge=0)
 
 
 class SqlIn(BaseModel):
     sql: str = Field(max_length=20_000)
+
+
+class ColumnDoc(BaseModel):
+    name: str
+    description: str
+    certainty: Literal["certain", "likely", "uncertain"]
+
+
+class DocOut(BaseModel):
+    table: str
+    summary: str
+    columns: list[ColumnDoc]
+    status: Literal["generated", "edited", "approved"]
+    stale: bool
+    llm_model: str
+    input_tokens: int
+    output_tokens: int
+    cost_usd: float
+    updated_at: datetime
+
+
+class DocIn(BaseModel):
+    summary: str
+    columns: list[ColumnDoc]
+    status: Literal["edited", "approved"]
+
+
+class RegenerateIn(BaseModel):
+    tables: list[str] = Field(min_length=1)

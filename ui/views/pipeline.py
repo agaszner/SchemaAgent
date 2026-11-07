@@ -22,7 +22,7 @@ with action:
 
 model = api_client.model(db["id"])
 relationships = api_client.request("GET", f"/databases/{db['id']}/relationships")
-markup.show(markup.stats(markup.counts(model, relationships)))
+markup.show(markup.stats(markup.counts(model, relationships, api_client.request("GET", f"/databases/{db['id']}/docs"))))
 
 
 @st.fragment(run_every="2s" if active else None)
