@@ -13,7 +13,7 @@ router = APIRouter(prefix="/databases/{database_id}", tags=["pipeline"])
 
 # duration_s stays NULL until a run has both timestamps
 # has_result is false for a done profile run whose output masking cleared
-# done and total are the docs step's progress, written into result while it runs
+# done and total are the docs and benchmark steps' progress, written into result while they run
 SELECT_RUNS = (
     "SELECT id, step, status, started_at, finished_at, error, result IS NOT NULL AS has_result,"
     " json_extract(result, '$.done') AS done, json_extract(result, '$.total') AS total,"

@@ -39,7 +39,7 @@ class RunOut(BaseModel):
     duration_s: float | None
     error: str | None
     has_result: bool
-    done: int | None  # docs progress; NULL for other steps
+    done: int | None  # docs and benchmark progress; NULL for other steps
     total: int | None
 
 
@@ -149,3 +149,9 @@ class DocIn(BaseModel):
 
 class RegenerateIn(BaseModel):
     tables: list[str] = Field(min_length=1)
+
+
+class BenchmarkOut(BaseModel):
+    run: RunOut
+    summary: dict | None  # {config: metrics} once the run is done
+    rows: list[dict]      # one per (config, question), as in results.csv

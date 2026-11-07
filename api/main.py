@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from api.routes import databases, docs, pipeline, relationships, settings, sql, tables
+from api.routes import benchmark, databases, docs, pipeline, relationships, settings, sql, tables
 from api.appdb import NotReady, init_db
 
 
@@ -16,6 +16,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="SchemaSage API", lifespan=lifespan)
+app.include_router(benchmark.router, prefix="/api")
 app.include_router(databases.router, prefix="/api")
 app.include_router(docs.router, prefix="/api")
 app.include_router(pipeline.router, prefix="/api")

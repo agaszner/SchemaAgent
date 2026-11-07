@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     app_db: Path = Path("app.db")
     data_dir: Path = Path("data")
     export_dir: Path = Path("docs")
+    benchmark_dir: Path = Path("benchmark")  # questions.jsonl and gold.sql in, results.csv out
     openai_api_key: SecretStr | None = Field(None, validation_alias="OPENAI_API_KEY")  # alias bypasses the prefix
 
 

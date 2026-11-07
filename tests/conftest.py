@@ -40,6 +40,7 @@ def client(tmp_path, monkeypatch, fake_llm):
     monkeypatch.setattr(settings, "app_db", tmp_path / "app.db")
     monkeypatch.setattr(settings, "data_dir", tmp_path)
     monkeypatch.setattr(settings, "export_dir", tmp_path / "export")
+    monkeypatch.setattr(settings, "benchmark_dir", tmp_path / "benchmark")
     with TestClient(app) as c:  # runs the lifespan, so init_db creates the schema
         yield c
 

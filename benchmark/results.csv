@@ -1,0 +1,421 @@
+config,id,category,kind,answer_kind,correct,score,path_correct,first_valid,repaired,claims,unsupported,latency_s,input_tokens,output_tokens,cost_usd,answer,tables,columns,path,first_sql,sql,error
+A,s01,schema,columns,schema,True,1.0,,,,2,0,1.9533735000004526,1534,45,0.0001759,The Customer table holds a customer's email address in the Email column.,Customer,Customer.Email,,,,
+A,s02,schema,columns,schema,True,1.0,,,,2,0,1.8251184590044431,1539,52,0.0001799,"A track’s playing time is stored in the `Track.Milliseconds` column, in milliseconds.",Track,Track.Milliseconds,,,,
+A,s03,schema,columns,schema,True,1.0,,,,3,0,2.005484458000865,1535,58,0.0001825,The Employee.ReportsTo column records which employee an employee reports to; it references Employee.EmployeeId.,Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
+A,s04,schema,columns,schema,True,1.0,,,,2,0,2.005972290993668,1536,51,0.00017910000000000002,The date an employee was hired is stored in the Employee table’s HireDate column.,Employee,Employee.HireDate,,,,
+A,s05,schema,columns,schema,True,1.0,,,,2,0,2.080145416999585,1536,46,0.0001766,The track file size is stored in the `Track.Bytes` column.,Track,Track.Bytes,,,,
+A,s06,schema,relationship,schema,True,1.0,True,,,4,0,2.032490166995558,1535,61,0.000184,"An invoice is connected to its customer through Invoice.CustomerId, which references Customer.CustomerId.",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
+A,s07,schema,relationship,schema,True,1.0,True,,,4,0,2.20244766700489,1538,74,0.0001908,"Customer.SupportRepId references Employee.EmployeeId, linking each customer to their supporting employee; SupportRepId is nullable. There is no separate link table.",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
+A,s08,schema,relationship,schema,True,1.0,True,,,4,0,1.9718478749855421,1538,81,0.0001943,"A track is linked to its album through Track.AlbumId, which references Album.AlbumId. Track.AlbumId is nullable, so a track may have no associated album.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
+A,s09,schema,relationship,schema,True,1.0,True,,,4,0,1.8882863329927204,1539,69,0.0001884,"InvoiceLine refers to the sold track through its TrackId column, which is a foreign key to Track.TrackId.",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
+A,s10,schema,relationship,schema,True,1.0,True,,,4,0,1.9991588330012746,1535,67,0.000187,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
+A,s11,schema,path,schema,True,1.0,True,,,10,0,2.121384666999802,1538,104,0.00020580000000000002,"Join Customer to Invoice on CustomerId, then Invoice to InvoiceLine on InvoiceId, and InvoiceLine to Track on TrackId. These are direct foreign-key relationships.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
+A,s12,schema,path,schema,True,1.0,True,,,15,0,2.5876968749944353,1545,134,0.0002215,"Join Playlist to PlaylistTrack, then Track and Album to reach Artist; filter by the playlist name. The Album-to-Artist relationship is established by Album.ArtistId referencing Artist.ArtistId.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
+A,s13,schema,path,schema,True,1.0,True,,,10,0,2.661432666995097,1539,116,0.0002119,"Join Artist to Album on ArtistId, then Album to Track on AlbumId, and Track to Genre on GenreId. Track.GenreId is nullable, so tracks without a genre will not match a Genre row.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
+A,s14,schema,path,schema,True,1.0,True,,,7,0,2.2026091669977177,1543,103,0.00020580000000000002,"Join Customer to Employee using Customer.SupportRepId = Employee.EmployeeId, then join Customer to Invoice using Customer.CustomerId = Invoice.CustomerId. The schema defines these foreign keys; this links each support employee to invoices for their supported customers.",Employee; Customer; Invoice,Customer.SupportRepId; Employee.EmployeeId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
+A,s15,schema,path,schema,True,1.0,True,,,11,0,2.4421027500065975,1543,119,0.00021380000000000002,"Join Invoice to InvoiceLine using InvoiceId, then InvoiceLine to Track using TrackId, and Track to MediaType using MediaTypeId. These relationships are specified by foreign keys in the schema.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
+A,s16,schema,unanswerable,abstain,True,,,,,0,0,1.4953406670101685,1531,40,0.0001731,The schema does not show a field that records refunds.,,,,,,
+A,s17,schema,unanswerable,abstain,True,,,,,0,0,2.0265230419900035,1536,42,0.00017460000000000002,The schema contains no column for a track’s average user rating.,,,,,,
+A,s18,schema,unanswerable,abstain,True,,,,,0,0,1.9736160410102457,1537,40,0.00017370000000000002,The schema contains no table for customer sign-in events.,,,,,,
+A,s19,schema,unanswerable,abstain,True,,,,,0,0,1.9800176249991637,1540,57,0.0001825,"The schema has no inventory or stock table or column, so it does not specify where the number of album copies left in stock is kept.",,,,,,
+A,s20,schema,unanswerable,abstain,True,,,,,0,0,1.9001910829974804,1535,47,0.000177,The schema has no customer date-of-birth column; Customer contains no birth-date field.,,,,,,
+A,d01,data,simple,sql,True,,,True,,0,0,2.057202416996006,1533,55,0.0001808,Counts the customers whose country is Germany.,Customer,Customer.Country,,"SELECT COUNT(*) AS customer_count
+FROM Customer
+WHERE Country = 'Germany';","SELECT COUNT(*) AS customer_count
+FROM Customer
+WHERE Country = 'Germany';",
+A,d02,data,simple,sql,True,,,True,,0,0,3.3068780829926254,1536,60,0.00018360000000000002,"Counts tracks whose duration exceeds 10 minutes (600,000 milliseconds).",Track,Track.Milliseconds,,SELECT COUNT(*) FROM Track WHERE Milliseconds > 600000;,SELECT COUNT(*) FROM Track WHERE Milliseconds > 600000;,
+A,d03,data,simple,sql,True,,,True,,0,0,2.6745942080015084,1542,88,0.00019820000000000002,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,"SELECT SUM(Total) AS TotalSum
+FROM Invoice
+WHERE InvoiceDate >= '2013-01-01'
+  AND InvoiceDate < '2014-01-01';","SELECT SUM(Total) AS TotalSum
+FROM Invoice
+WHERE InvoiceDate >= '2013-01-01'
+  AND InvoiceDate < '2014-01-01';",
+A,d04,data,simple,sql,True,,,True,,0,0,2.126723666995531,1540,76,0.000192,Returns the first and last name of the employee with the earliest hire date.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
+FROM Employee
+ORDER BY HireDate ASC
+LIMIT 1;","SELECT FirstName, LastName
+FROM Employee
+ORDER BY HireDate ASC
+LIMIT 1;",
+A,d05,data,simple,sql,True,,,True,,0,0,1.8949329580063932,1534,55,0.0001809,Counts tracks whose Composer value is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS track_count
+FROM Track
+WHERE Composer IS NULL;","SELECT COUNT(*) AS track_count
+FROM Track
+WHERE Composer IS NULL;",
+A,d06,data,join,sql,True,,,True,,0,0,3.094331875006901,1536,173,0.00024010000000000004,This returns the five artists with the greatest total revenue from invoice line prices multiplied by quantities.,,,,"SELECT ar.ArtistId, ar.Name, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+FROM Artist AS ar
+JOIN Album AS al ON al.ArtistId = ar.ArtistId
+JOIN Track AS t ON t.AlbumId = al.AlbumId
+JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
+GROUP BY ar.ArtistId, ar.Name
+ORDER BY SalesRevenue DESC
+LIMIT 5;","SELECT ar.ArtistId, ar.Name, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+FROM Artist AS ar
+JOIN Album AS al ON al.ArtistId = ar.ArtistId
+JOIN Track AS t ON t.AlbumId = al.AlbumId
+JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
+GROUP BY ar.ArtistId, ar.Name
+ORDER BY SalesRevenue DESC
+LIMIT 5;",
+A,d07,data,join,sql,True,,,True,,0,0,4.131489916995633,1559,248,0.0002799,"This returns each employee assigned as a customer support agent and the sum of the invoice totals for their supported customers, using zero when they have no invoices.",,,,"SELECT e.FirstName, e.LastName, COALESCE(SUM(i.Total), 0) AS InvoiceTotalSum
+FROM Employee AS e
+JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
+LEFT JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+GROUP BY e.EmployeeId, e.FirstName, e.LastName;","SELECT e.FirstName, e.LastName, COALESCE(SUM(i.Total), 0) AS InvoiceTotalSum
+FROM Employee AS e
+JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
+LEFT JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+GROUP BY e.EmployeeId, e.FirstName, e.LastName;",
+A,d08,data,join,sql,True,,,True,,0,0,2.4292372500058264,1547,141,0.00022520000000000003,"This returns each media type and the number of tracks associated with it, including media types with no tracks.",,,,"SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
+FROM MediaType AS m
+LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
+GROUP BY m.MediaTypeId, m.Name;","SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
+FROM MediaType AS m
+LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
+GROUP BY m.MediaTypeId, m.Name;",
+A,d09,data,join,sql,True,,,True,,0,0,3.9264192920090863,1544,230,0.0002694,Returns the title and artist name for the album with the greatest number of tracks.,,,,"SELECT Album.Title, Artist.Name
+FROM Album
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+LEFT JOIN Track ON Track.AlbumId = Album.AlbumId
+GROUP BY Album.AlbumId, Album.Title, Artist.Name
+ORDER BY COUNT(Track.TrackId) DESC
+LIMIT 1;","SELECT Album.Title, Artist.Name
+FROM Album
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+LEFT JOIN Track ON Track.AlbumId = Album.AlbumId
+GROUP BY Album.AlbumId, Album.Title, Artist.Name
+ORDER BY COUNT(Track.TrackId) DESC
+LIMIT 1;",
+A,d10,data,join,sql,True,,,True,,0,0,2.520757042002515,1552,130,0.0002202,Returns the first and last names of the five customers with the highest summed invoice totals.,,,,"SELECT c.FirstName, c.LastName
+FROM Customer AS c
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+GROUP BY c.CustomerId, c.FirstName, c.LastName
+ORDER BY SUM(i.Total) DESC
+LIMIT 5;","SELECT c.FirstName, c.LastName
+FROM Customer AS c
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+GROUP BY c.CustomerId, c.FirstName, c.LastName
+ORDER BY SUM(i.Total) DESC
+LIMIT 5;",
+A,d11,data,value,sql,True,,,True,,0,0,2.988390583996079,1541,136,0.00022210000000000003,Computes the total number of Rock track units sold by summing invoice-line quantities.,,,,"SELECT COALESCE(SUM(il.Quantity), 0) AS total_rock_tracks_sold
+FROM InvoiceLine AS il
+JOIN Track AS t ON t.TrackId = il.TrackId
+JOIN Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Rock';","SELECT COALESCE(SUM(il.Quantity), 0) AS total_rock_tracks_sold
+FROM InvoiceLine AS il
+JOIN Track AS t ON t.TrackId = il.TrackId
+JOIN Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Rock';",
+A,d12,data,value,sql,False,,,True,,0,0,1.902411667004344,1542,91,0.00019970000000000003,Computes the sum of invoice totals for customers whose city is Montreal.,Customer; Invoice,Customer.City; Customer.CustomerId; Invoice.CustomerId; Invoice.Total,,"SELECT SUM(Invoice.Total) AS total_invoice_amount
+FROM Customer
+JOIN Invoice ON Invoice.CustomerId = Customer.CustomerId
+WHERE Customer.City = 'Montreal';","SELECT SUM(Invoice.Total) AS total_invoice_amount
+FROM Customer
+JOIN Invoice ON Invoice.CustomerId = Customer.CustomerId
+WHERE Customer.City = 'Montreal';",
+A,d13,data,value,sql,False,,,True,,0,0,2.493660332998843,1541,71,0.00018960000000000003,Computes the sum of invoice totals for invoices billed to Sao Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,SELECT SUM(Total) AS total_invoiced FROM Invoice WHERE BillingCity = 'Sao Paulo';,SELECT SUM(Total) AS total_invoiced FROM Invoice WHERE BillingCity = 'Sao Paulo';,
+A,d14,data,value,sql,True,,,True,,0,0,3.2034288330032723,1548,202,0.00025580000000000004,Counts tracks whose media type is “Purchased AAC audio file.”,,,,"SELECT COUNT(*) AS track_count
+FROM Track AS t
+JOIN MediaType AS m ON m.MediaTypeId = t.MediaTypeId
+WHERE m.Name = 'Purchased AAC audio file';","SELECT COUNT(*) AS track_count
+FROM Track AS t
+JOIN MediaType AS m ON m.MediaTypeId = t.MediaTypeId
+WHERE m.Name = 'Purchased AAC audio file';",
+A,d15,data,value,sql,True,,,True,,0,0,4.248103500009165,1541,273,0.0002906,Counts the tracks assigned to the “Sci Fi & Fantasy” genre.,,,,"SELECT COUNT(*) AS TrackCount
+FROM Track AS t
+JOIN Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Sci Fi & Fantasy';","SELECT COUNT(*) AS TrackCount
+FROM Track AS t
+JOIN Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Sci Fi & Fantasy';",
+A,d16,data,unanswerable,abstain,True,,,,,0,0,1.7958637089905096,1535,60,0.0001835,"The database records tracks included on invoices, but it has no listening or play-history data, so the number of tracks listened to last year cannot be determined.",,,,,,
+A,d17,data,unanswerable,abstain,True,,,,,0,0,1.719462916997145,1537,51,0.00017920000000000002,"The schema contains no user-rating table or rating column, so the tracks’ average user ratings cannot be determined.",,,,,,
+A,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.462112666995381,3132,186,0.00040620000000000006,"The schema contains Customer.Email, but it is masked and cannot be filtered, so the number of Gmail addresses cannot be determined from the available context.",,,,"SELECT COUNT(*) AS customer_count
+FROM Customer
+WHERE Email LIKE '%@gmail.com';",,"invalid: column Customer.Email is masked: select it as a plain column to get ***; it cannot be used in expressions, filters, joins, sorting, grouping, subqueries or set operations"
+A,d19,data,unanswerable,abstain,True,,,,,0,0,2.1931302079901798,1539,55,0.00018140000000000002,"The schema has invoice totals and line-item prices and quantities, but no discount field, so the total discount given cannot be determined.",,,,,,
+A,d20,data,unanswerable,abstain,True,,,,,0,0,1.7384340410062578,1535,55,0.000181,"The schema contains track details but no inventory or stock-status data, so the number of tracks currently out of stock cannot be determined.",,,,,,
+B,s01,schema,columns,schema,True,1.0,,,,2,0,2.1237543750030454,3213,46,0.0003443,A customer's email address is stored in the Customer table's Email column.,Customer,Customer.Email,,,,
+B,s02,schema,columns,schema,True,1.0,,,,2,0,2.169505042009405,3218,49,0.0003463,A track’s playing time is stored in the Track table’s Milliseconds column.,Track,Track.Milliseconds,,,,
+B,s03,schema,columns,schema,True,1.0,,,,3,0,1.871065291998093,3214,64,0.0003534,The `Employee.ReportsTo` column records the employee ID of the employee’s manager; it references `Employee.EmployeeId`.,Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
+B,s04,schema,columns,schema,True,1.0,,,,2,0,1.7961070830060635,3215,49,0.000346,The employee hire date is stored in the Employee table’s HireDate column.,Employee,Employee.HireDate,,,,
+B,s05,schema,columns,schema,True,1.0,,,,2,0,1.8494858750054846,3215,46,0.0003445,The file size of a track is stored in `Track.Bytes`.,Track,Track.Bytes,,,,
+B,s06,schema,relationship,schema,True,1.0,True,,,4,0,1.8589854999881936,3228,61,0.0003533,"An invoice is connected to its customer through Invoice.CustomerId, which references Customer.CustomerId.",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
+B,s07,schema,relationship,schema,True,1.0,True,,,4,0,1.8124830839951755,3232,68,0.00035720000000000006,"A customer is linked to their supporting employee through Customer.SupportRepId, which references Employee.EmployeeId (accepted relationship).",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
+B,s08,schema,relationship,schema,True,1.0,True,,,4,0,1.9085884999949485,3233,68,0.0003573,"A track is linked to its album through `Track.AlbumId`, which references `Album.AlbumId`.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
+B,s09,schema,relationship,schema,True,1.0,True,,,4,0,2.099966207999387,3233,65,0.00035580000000000003,"InvoiceLine refers to the sold track through InvoiceLine.TrackId, which references Track.TrackId.",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
+B,s10,schema,relationship,schema,True,1.0,True,,,4,0,1.723309834007523,3230,67,0.0003565,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
+B,s11,schema,path,schema,True,1.0,True,,,10,0,2.1370267080055783,3253,121,0.0003858,"Join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId, then Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, and InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId to find the tracks each customer bought.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
+B,s12,schema,path,schema,True,1.0,True,,,15,0,2.3783551669912413,3276,142,0.00039860000000000004,"Join Playlist to PlaylistTrack by PlaylistId, then to Track by TrackId, Album by AlbumId, and Artist by ArtistId; filter Playlist.Name to the given playlist name and select distinct artists. These joins follow the accepted relationships.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
+B,s13,schema,path,schema,True,1.0,True,,,10,0,2.1421950419899076,3270,122,0.000388,"Join Artist to Album on Artist.ArtistId = Album.ArtistId, Album to Track on Album.AlbumId = Track.AlbumId, and Track to Genre on Track.GenreId = Genre.GenreId. These are accepted relationships.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
+B,s14,schema,path,schema,True,1.0,True,,,8,0,1.973494000005303,3257,102,0.00037670000000000005,"Join Employee to Customer on Employee.EmployeeId = Customer.SupportRepId, then join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId. Filter Employee.Title for the sales support role; this follows the accepted relationships.",Employee; Customer; Invoice,Employee.EmployeeId; Employee.Title; Customer.SupportRepId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
+B,s15,schema,path,schema,True,1.0,True,,,11,0,2.2526514170021983,3274,128,0.0003914,"Join Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, then InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId, and finally Track to MediaType on Track.MediaTypeId = MediaType.MediaTypeId.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
+B,s16,schema,unanswerable,abstain,True,,,,,0,0,2.1127031250071013,3210,49,0.0003455,The schema does not identify a field that records refunds; no refund-specific table or column is described.,,,,,,
+B,s17,schema,unanswerable,abstain,True,,,,,0,0,1.6534022080013528,3215,45,0.000344,The provided schema does not include a column for a track’s average user rating.,,,,,,
+B,s18,schema,unanswerable,abstain,True,,,,,0,0,1.9672311670001363,3216,43,0.00034310000000000005,The provided schema does not include a table that records customer sign-ins.,,,,,,
+B,s19,schema,unanswerable,abstain,True,,,,,0,0,2.3124853339977562,3219,57,0.00035040000000000006,"The provided schema has no inventory or stock table or column, so it does not show where the number of album copies in stock is kept.",,,,,,
+B,s20,schema,unanswerable,abstain,True,,,,,0,0,1.9093880000000354,3214,50,0.0003464,The schema does not include a customer date-of-birth column; it only lists BirthDate for employees.,,,,,,
+B,d01,data,simple,sql,True,,,True,,0,0,1.6887532499968074,3212,55,0.0003487,Counts the customers whose country is Germany.,Customer,Customer.Country,,"SELECT COUNT(*) AS customer_count
+FROM Customer
+WHERE Country = 'Germany';","SELECT COUNT(*) AS customer_count
+FROM Customer
+WHERE Country = 'Germany';",
+B,d02,data,simple,sql,True,,,True,,0,0,2.0282785419985885,3215,62,0.0003525,Counts tracks with a duration longer than 10 minutes.,Track,Track.Milliseconds,,SELECT COUNT(*) FROM Track WHERE Milliseconds > 10 * 60 * 1000;,SELECT COUNT(*) FROM Track WHERE Milliseconds > 10 * 60 * 1000;,
+B,d03,data,simple,sql,True,,,True,,0,0,2.0149647500074934,3221,87,0.0003656,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
+FROM Invoice
+WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';","SELECT SUM(Total) AS total_invoice_amount
+FROM Invoice
+WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';",
+B,d04,data,simple,sql,True,,,True,,0,0,2.0519826659874525,3219,76,0.0003599,Returns the first and last name of the employee with the earliest hire date.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
+FROM Employee
+ORDER BY HireDate ASC
+LIMIT 1;","SELECT FirstName, LastName
+FROM Employee
+ORDER BY HireDate ASC
+LIMIT 1;",
+B,d05,data,simple,sql,True,,,True,,0,0,1.9117116249981336,3213,57,0.0003498,Counts tracks whose Composer field is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS tracks_without_composer
+FROM Track
+WHERE Composer IS NULL;","SELECT COUNT(*) AS tracks_without_composer
+FROM Track
+WHERE Composer IS NULL;",
+B,d06,data,join,sql,True,,,True,,0,0,2.832549791986821,3215,171,0.000407,Computes total invoice-line revenue by artist and returns the five artists with the highest totals.,,,,"SELECT ar.ArtistId, ar.Name, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+FROM Artist AS ar
+JOIN Album AS al ON al.ArtistId = ar.ArtistId
+JOIN Track AS t ON t.AlbumId = al.AlbumId
+JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
+GROUP BY ar.ArtistId, ar.Name
+ORDER BY SalesRevenue DESC
+LIMIT 5;","SELECT ar.ArtistId, ar.Name, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+FROM Artist AS ar
+JOIN Album AS al ON al.ArtistId = ar.ArtistId
+JOIN Track AS t ON t.AlbumId = al.AlbumId
+JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
+GROUP BY ar.ArtistId, ar.Name
+ORDER BY SalesRevenue DESC
+LIMIT 5;",
+B,d07,data,join,sql,True,,,True,,0,0,3.1816763749957317,3252,191,0.00042070000000000003,Sums the invoice totals for each sales support agent’s customers and returns the agent’s first and last names with the sum.,,,,"SELECT e.FirstName, e.LastName, SUM(i.Total) AS InvoiceTotalSum
+FROM Employee AS e
+JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+WHERE e.Title = 'Sales Support Agent'
+GROUP BY e.EmployeeId, e.FirstName, e.LastName;","SELECT e.FirstName, e.LastName, SUM(i.Total) AS InvoiceTotalSum
+FROM Employee AS e
+JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+WHERE e.Title = 'Sales Support Agent'
+GROUP BY e.EmployeeId, e.FirstName, e.LastName;",
+B,d08,data,join,sql,True,,,True,,0,0,2.5655333750037244,3243,146,0.0003973,"This counts tracks for each media type, including any media types with no tracks.",,,,"SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
+FROM MediaType AS m
+LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
+GROUP BY m.MediaTypeId, m.Name
+ORDER BY m.MediaTypeId;","SELECT m.Name AS MediaTypeName, COUNT(t.TrackId) AS TrackCount
+FROM MediaType AS m
+LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
+GROUP BY m.MediaTypeId, m.Name
+ORDER BY m.MediaTypeId;",
+B,d09,data,join,sql,True,,,True,,0,0,2.031076707993634,3263,107,0.0003798,Returns the title and artist of the album with the most tracks.,,,,"SELECT Album.Title, Artist.Name
+FROM Album
+JOIN Track ON Track.AlbumId = Album.AlbumId
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+GROUP BY Album.AlbumId, Album.Title, Artist.ArtistId, Artist.Name
+ORDER BY COUNT(Track.TrackId) DESC
+LIMIT 1;","SELECT Album.Title, Artist.Name
+FROM Album
+JOIN Track ON Track.AlbumId = Album.AlbumId
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+GROUP BY Album.AlbumId, Album.Title, Artist.ArtistId, Artist.Name
+ORDER BY COUNT(Track.TrackId) DESC
+LIMIT 1;",
+B,d10,data,join,sql,True,,,True,,0,0,2.381591291006771,3245,120,0.0003845,Returns the first and last names of the five customers with the greatest sum of invoice totals.,Customer; Invoice,Customer.CustomerId; Customer.FirstName; Customer.LastName; Invoice.CustomerId; Invoice.Total,,"SELECT c.FirstName, c.LastName
+FROM Customer AS c
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+GROUP BY c.CustomerId, c.FirstName, c.LastName
+ORDER BY SUM(i.Total) DESC
+LIMIT 5;","SELECT c.FirstName, c.LastName
+FROM Customer AS c
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+GROUP BY c.CustomerId, c.FirstName, c.LastName
+ORDER BY SUM(i.Total) DESC
+LIMIT 5;",
+B,d11,data,value,sql,True,,,True,,0,0,2.6347901669942075,3220,136,0.00039,Computes the total quantity of all invoice-line units associated with tracks in the Rock genre.,InvoiceLine; Track; Genre,InvoiceLine.Quantity; InvoiceLine.TrackId; Track.TrackId; Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COALESCE(SUM(il.Quantity), 0) AS rock_units_sold
+FROM InvoiceLine AS il
+JOIN Track AS t ON t.TrackId = il.TrackId
+JOIN Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Rock';","SELECT COALESCE(SUM(il.Quantity), 0) AS rock_units_sold
+FROM InvoiceLine AS il
+JOIN Track AS t ON t.TrackId = il.TrackId
+JOIN Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Rock';",
+B,d12,data,value,sql,False,,,True,,0,0,2.083239333005622,3235,92,0.0003695,Computes the sum of invoice totals for customers whose city is Montreal.,Customer; Invoice,Customer.City; Customer.CustomerId; Invoice.CustomerId; Invoice.Total,,"SELECT SUM(i.Total) AS total_invoice_amount
+FROM Customer c
+JOIN Invoice i ON i.CustomerId = c.CustomerId
+WHERE c.City = 'Montreal';","SELECT SUM(i.Total) AS total_invoice_amount
+FROM Customer c
+JOIN Invoice i ON i.CustomerId = c.CustomerId
+WHERE c.City = 'Montreal';",
+B,d13,data,value,sql,True,,,True,,0,0,2.461325542011764,3220,71,0.0003575,Computes the sum of invoice totals for invoices billed in São Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
+FROM Invoice
+WHERE BillingCity = 'São Paulo';","SELECT SUM(Total) AS total_invoice_amount
+FROM Invoice
+WHERE BillingCity = 'São Paulo';",
+B,d14,data,value,abstain,False,,,,,0,0,5.829650124986074,3227,470,0.0005577000000000001,"The context does not provide the media-type names or identify which media type represents AAC files purchased in a store, so the matching tracks cannot be determined.",,,,,,
+B,d15,data,value,sql,True,,,True,,0,0,5.179052249994129,3236,366,0.0005066000000000001,Counts the tracks assigned to the genre whose name combines science fiction and fantasy.,Track; Genre,Track.GenreId; Genre.GenreId; Genre.Name,Track.GenreId = Genre.GenreId,"SELECT COUNT(*)
+FROM Track AS t
+JOIN Genre AS g ON t.GenreId = g.GenreId
+WHERE (g.Name LIKE '%Science Fiction%' OR g.Name LIKE '%Sci Fi%')
+  AND g.Name LIKE '%Fantasy%';","SELECT COUNT(*)
+FROM Track AS t
+JOIN Genre AS g ON t.GenreId = g.GenreId
+WHERE (g.Name LIKE '%Science Fiction%' OR g.Name LIKE '%Sci Fi%')
+  AND g.Name LIKE '%Fantasy%';",
+B,d16,data,unanswerable,abstain,True,,,,,0,0,2.499279875002685,3214,61,0.00035190000000000004,"The database records tracks purchased on invoices but does not record when or whether tracks were listened to; moreover, the reference year for “last year” is unspecified.",,,,,,
+B,d17,data,unanswerable,abstain,True,,,,,0,0,1.8421874170016963,3216,51,0.00034710000000000003,"The database context contains no user-rating table or rating column, so the five highest-rated tracks cannot be determined.",,,,,,
+B,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.403388250007993,6490,144,0.000721,The number cannot be determined because Customer.Email is masked and cannot be used in a filter to identify Gmail addresses.,Customer,Customer.Email,,"SELECT COUNT(*) AS customer_count
+FROM Customer
+WHERE Email LIKE '%@gmail.com';",,"invalid: column Customer.Email is masked: select it as a plain column to get ***; it cannot be used in expressions, filters, joins, sorting, grouping, subqueries or set operations"
+B,d19,data,unanswerable,abstain,True,,,,,0,0,2.253082249997533,3218,67,0.0003553,"The schema provides invoice totals and line-item unit prices, but no discount amount, discount rate, or original pre-discount price, so the total discount in 2012 cannot be determined.",,,,,,
+B,d20,data,unanswerable,abstain,True,,,,,0,0,1.8410648339922773,3214,54,0.0003484,"The schema does not include inventory or stock-availability data, so the number of tracks currently out of stock cannot be determined.",,,,,,
+C,s01,schema,columns,schema,True,1.0,,,,2,0,1.8461867919977522,9353,40,0.0009553000000000001,Customer.Email stores a customer's email address.,Customer,Customer.Email,,,,
+C,s02,schema,columns,schema,True,1.0,,,,2,0,1.7964322089974303,9358,48,0.0009598,"Track duration is stored in the Track.Milliseconds column, measured in milliseconds.",Track,Track.Milliseconds,,,,
+C,s03,schema,columns,schema,True,1.0,,,,3,0,2.5980535410053562,9354,53,0.0009619000000000001,"Employee.ReportsTo records the employee’s manager, referencing Employee.EmployeeId.",Employee,Employee.ReportsTo; Employee.EmployeeId,,,,
+C,s04,schema,columns,schema,True,1.0,,,,2,0,1.9737829160003457,9355,54,0.0009625,The employee hire date is stored in the `HireDate` column of the `Employee` table.,Employee,Employee.HireDate,,,,
+C,s05,schema,columns,schema,True,1.0,,,,2,0,2.253542209000443,9355,53,0.000962,The file size of a track is stored in the `Bytes` column of the `Track` table.,Track,Track.Bytes,,,,
+C,s06,schema,relationship,schema,True,1.0,True,,,4,0,2.9382828749949113,9368,67,0.0009703000000000001,"An invoice connects to its customer through `Invoice.CustomerId`, which references `Customer.CustomerId` (accepted relationship).",Invoice; Customer,Invoice.CustomerId; Customer.CustomerId,Invoice; Customer,,,
+C,s07,schema,relationship,schema,True,1.0,True,,,4,0,2.1665048750001006,9372,72,0.0009732,"A customer is linked to their supporting employee through `Customer.SupportRepId`, which references `Employee.EmployeeId` (an accepted relationship).",Customer; Employee,Customer.SupportRepId; Employee.EmployeeId,Customer; Employee,,,
+C,s08,schema,relationship,schema,True,1.0,True,,,4,0,2.3383237499947427,9373,75,0.0009748000000000001,"A track is linked to its album through `Track.AlbumId`, which references `Album.AlbumId`; join Track to Album on those columns.",Track; Album,Track.AlbumId; Album.AlbumId,Track; Album,,,
+C,s09,schema,relationship,schema,True,1.0,True,,,4,0,2.0478925420029555,9373,74,0.0009743000000000001,"InvoiceLine refers to the sold track through `InvoiceLine.TrackId`, which joins to `Track.TrackId` (an accepted relationship).",InvoiceLine; Track,InvoiceLine.TrackId; Track.TrackId,InvoiceLine; Track,,,
+C,s10,schema,relationship,schema,True,1.0,True,,,4,0,2.03963791699789,9370,79,0.0009765,"A track connects to its genre through `Track.GenreId`, which references `Genre.GenreId`; join `Track.GenreId = Genre.GenreId`.",Track; Genre,Track.GenreId; Genre.GenreId,Track; Genre,,,
+C,s11,schema,path,schema,True,1.0,True,,,10,0,2.7742708749865415,9393,120,0.0009993,"Join Customer to Invoice on Customer.CustomerId = Invoice.CustomerId, then Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, and InvoiceLine to Track on InvoiceLine.TrackId = Track.TrackId to reach the tracks customers bought.",Customer; Invoice; InvoiceLine; Track,Customer.CustomerId; Invoice.CustomerId; Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId,Customer; Invoice; InvoiceLine; Track,,,
+C,s12,schema,path,schema,True,1.0,True,,,15,0,2.964287416994921,9416,137,0.0010101,"Join Playlist to PlaylistTrack on PlaylistId, then to Track on TrackId, then to Album on AlbumId, and finally to Artist on ArtistId; filter by Playlist.Name. The join relationships are accepted.",Playlist; PlaylistTrack; Track; Album; Artist,Playlist.Name; Playlist.PlaylistId; PlaylistTrack.PlaylistId; PlaylistTrack.TrackId; Track.TrackId; Track.AlbumId; Album.AlbumId; Album.ArtistId; Artist.ArtistId; Artist.Name,Playlist; PlaylistTrack; Track; Album; Artist,,,
+C,s13,schema,path,schema,True,1.0,True,,,10,0,2.528308457985986,9410,130,0.001006,"Join Artist to Album on Artist.ArtistId = Album.ArtistId, then Album to Track on Album.AlbumId = Track.AlbumId, and Track to Genre on Track.GenreId = Genre.GenreId; this connects each artist to genres of tracks on their albums.",Artist; Album; Track; Genre,Artist.ArtistId; Album.ArtistId; Album.AlbumId; Track.AlbumId; Track.GenreId; Genre.GenreId,Artist; Album; Track; Genre,,,
+C,s14,schema,path,schema,True,1.0,True,,,7,0,2.120525958991493,9397,86,0.0009827,"Join Employee.EmployeeId to Customer.SupportRepId, then Customer.CustomerId to Invoice.CustomerId; this links each employee to invoices for their supported customers.",Employee; Customer; Invoice,Employee.EmployeeId; Customer.SupportRepId; Customer.CustomerId; Invoice.CustomerId,Employee; Customer; Invoice,,,
+C,s15,schema,path,schema,True,1.0,True,,,11,0,2.3626711670076475,9414,132,0.0010074,"Join Invoice to InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId, then to Track on InvoiceLine.TrackId = Track.TrackId, and finally to MediaType on Track.MediaTypeId = MediaType.MediaTypeId to get each track’s media type.",Invoice; InvoiceLine; Track; MediaType,Invoice.InvoiceId; InvoiceLine.InvoiceId; InvoiceLine.TrackId; Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name,Invoice; InvoiceLine; Track; MediaType,,,
+C,s16,schema,unanswerable,abstain,True,,,,,0,0,1.789482374995714,9350,40,0.000955,The schema does not identify any field that records refunds.,,,,,,
+C,s17,schema,unanswerable,abstain,True,,,,,0,0,1.7664447919960367,9355,44,0.0009575,The schema does not include a column for a track’s average user rating.,,,,,,
+C,s18,schema,unanswerable,abstain,True,,,,,0,0,2.229602583000087,9356,45,0.0009581,The provided schema contains no table that records customer sign-in events or login times.,,,,,,
+C,s19,schema,unanswerable,abstain,True,,,,,0,0,2.2518904589960584,9359,60,0.0009659000000000001,"The provided schema has no stock or inventory table or album-copy quantity column, so it does not indicate where the number of album copies in stock is kept.",,,,,,
+C,s20,schema,unanswerable,abstain,True,,,,,0,0,1.7112123330007307,9354,51,0.0009609000000000001,The schema does not show a date-of-birth column for customers; BirthDate is listed only for employees.,,,,,,
+C,d01,data,simple,sql,True,,,True,,0,0,1.9631562080030562,9352,53,0.0009617,Counts the customers whose country is Germany.,Customer,Customer.Country,,SELECT COUNT(*) AS customer_count FROM Customer WHERE Country = 'Germany';,SELECT COUNT(*) AS customer_count FROM Customer WHERE Country = 'Germany';,
+C,d02,data,simple,sql,True,,,True,,0,0,2.240091958010453,9355,65,0.000968,Counts tracks whose duration exceeds 10 minutes.,Track,Track.Milliseconds,,"SELECT COUNT(*) AS track_count
+FROM Track
+WHERE Milliseconds > 10 * 60 * 1000;","SELECT COUNT(*) AS track_count
+FROM Track
+WHERE Milliseconds > 10 * 60 * 1000;",
+C,d03,data,simple,sql,True,,,True,,0,0,2.2673752499977127,9361,86,0.0009791000000000001,Computes the sum of invoice totals for invoices dated in 2013.,Invoice,Invoice.InvoiceDate; Invoice.Total,,SELECT SUM(Total) AS sum_invoice_totals FROM Invoice WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';,SELECT SUM(Total) AS sum_invoice_totals FROM Invoice WHERE InvoiceDate >= '2013-01-01' AND InvoiceDate < '2014-01-01';,
+C,d04,data,simple,sql,True,,,True,,0,0,2.67176058300538,9359,78,0.0009749000000000001,Finds the employee with the earliest hire date and returns their first and last name.,Employee,Employee.FirstName; Employee.LastName; Employee.HireDate,,"SELECT FirstName, LastName
+FROM Employee
+ORDER BY HireDate ASC
+LIMIT 1;","SELECT FirstName, LastName
+FROM Employee
+ORDER BY HireDate ASC
+LIMIT 1;",
+C,d05,data,simple,sql,True,,,True,,0,0,2.347624750007526,9353,57,0.0009638000000000001,Counts tracks whose Composer field is NULL.,Track,Track.Composer,,"SELECT COUNT(*) AS tracks_without_composer
+FROM Track
+WHERE Composer IS NULL;","SELECT COUNT(*) AS tracks_without_composer
+FROM Track
+WHERE Composer IS NULL;",
+C,d06,data,join,sql,True,,,True,,0,0,3.2146727920044214,9355,190,0.0010305,"This calculates sales revenue from invoice line prices and quantities, groups it by artist, and returns the five highest-revenue artists.",,,,"SELECT ar.Name AS Artist, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+FROM Artist AS ar
+JOIN Album AS al ON al.ArtistId = ar.ArtistId
+JOIN Track AS t ON t.AlbumId = al.AlbumId
+JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
+GROUP BY ar.ArtistId, ar.Name
+ORDER BY SalesRevenue DESC
+LIMIT 5;","SELECT ar.Name AS Artist, SUM(il.UnitPrice * il.Quantity) AS SalesRevenue
+FROM Artist AS ar
+JOIN Album AS al ON al.ArtistId = ar.ArtistId
+JOIN Track AS t ON t.AlbumId = al.AlbumId
+JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
+GROUP BY ar.ArtistId, ar.Name
+ORDER BY SalesRevenue DESC
+LIMIT 5;",
+C,d07,data,join,sql,True,,,True,,0,0,4.091281665998395,9392,161,0.0010197000000000001,"Computes the sum of invoice totals for each sales support agent’s customers, returning the agent’s first and last names with the sum.",,,,"SELECT e.FirstName, e.LastName, SUM(i.Total) AS InvoiceTotalSum
+FROM Employee AS e
+JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+WHERE e.Title = 'Sales Support Agent'
+GROUP BY e.EmployeeId, e.FirstName, e.LastName;","SELECT e.FirstName, e.LastName, SUM(i.Total) AS InvoiceTotalSum
+FROM Employee AS e
+JOIN Customer AS c ON c.SupportRepId = e.EmployeeId
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+WHERE e.Title = 'Sales Support Agent'
+GROUP BY e.EmployeeId, e.FirstName, e.LastName;",
+C,d08,data,join,sql,True,,,True,,0,0,2.299661750002997,9383,99,0.0009878,Counts the tracks for each media type and returns the media type name with its track count.,,,,"SELECT m.Name AS MediaType, COUNT(t.TrackId) AS TrackCount
+FROM MediaType AS m
+LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
+GROUP BY m.MediaTypeId, m.Name
+ORDER BY m.MediaTypeId;","SELECT m.Name AS MediaType, COUNT(t.TrackId) AS TrackCount
+FROM MediaType AS m
+LEFT JOIN Track AS t ON t.MediaTypeId = m.MediaTypeId
+GROUP BY m.MediaTypeId, m.Name
+ORDER BY m.MediaTypeId;",
+C,d09,data,join,sql,True,,,True,,0,0,3.019453542001429,9403,183,0.0010318000000000003,Returns the album title and artist name for the album with the most tracks.,Album; Track; Artist,Album.AlbumId; Album.Title; Album.ArtistId; Track.AlbumId; Track.TrackId; Artist.ArtistId; Artist.Name,,"SELECT Album.Title, Artist.Name AS ArtistName
+FROM Album
+JOIN Track ON Track.AlbumId = Album.AlbumId
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+GROUP BY Album.AlbumId, Album.Title, Artist.Name
+ORDER BY COUNT(Track.TrackId) DESC
+LIMIT 1;","SELECT Album.Title, Artist.Name AS ArtistName
+FROM Album
+JOIN Track ON Track.AlbumId = Album.AlbumId
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+GROUP BY Album.AlbumId, Album.Title, Artist.Name
+ORDER BY COUNT(Track.TrackId) DESC
+LIMIT 1;",
+C,d10,data,join,sql,True,,,True,,0,0,2.4158686669979943,9385,98,0.0009875,"Returns the five customers with the highest summed invoice totals, showing each customer's first and last name.",,,,"SELECT c.FirstName, c.LastName
+FROM Customer AS c
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+GROUP BY c.CustomerId, c.FirstName, c.LastName
+ORDER BY SUM(i.Total) DESC
+LIMIT 5;","SELECT c.FirstName, c.LastName
+FROM Customer AS c
+JOIN Invoice AS i ON i.CustomerId = c.CustomerId
+GROUP BY c.CustomerId, c.FirstName, c.LastName
+ORDER BY SUM(i.Total) DESC
+LIMIT 5;",
+C,d11,data,value,sql,True,,,True,,0,0,4.115107207995607,9360,171,0.0010215,This calculates the total quantity of Rock tracks across all invoice line items.,InvoiceLine; Track; Genre,InvoiceLine.Quantity; InvoiceLine.TrackId; Track.TrackId; Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COALESCE(SUM(il.Quantity), 0) AS rock_units_sold
+FROM InvoiceLine AS il
+JOIN Track AS t ON t.TrackId = il.TrackId
+JOIN Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Rock';","SELECT COALESCE(SUM(il.Quantity), 0) AS rock_units_sold
+FROM InvoiceLine AS il
+JOIN Track AS t ON t.TrackId = il.TrackId
+JOIN Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Rock';",
+C,d12,data,value,sql,True,,,True,,0,0,3.5974798329989426,9375,208,0.0010415,Computes the sum of invoice totals for customers whose city is Montréal.,Invoice; Customer,Invoice.Total; Invoice.CustomerId; Customer.CustomerId; Customer.City,,"SELECT SUM(i.Total) AS total_invoice_amount
+FROM Invoice AS i
+JOIN Customer AS c ON i.CustomerId = c.CustomerId
+WHERE c.City = 'Montréal';","SELECT SUM(i.Total) AS total_invoice_amount
+FROM Invoice AS i
+JOIN Customer AS c ON i.CustomerId = c.CustomerId
+WHERE c.City = 'Montréal';",
+C,d13,data,value,sql,True,,,True,,0,0,2.1890750840102555,9360,71,0.0009715,This computes the sum of invoice totals for invoices billed to São Paulo.,Invoice,Invoice.BillingCity; Invoice.Total,,"SELECT SUM(Total) AS total_invoice_amount
+FROM Invoice
+WHERE BillingCity = 'São Paulo';","SELECT SUM(Total) AS total_invoice_amount
+FROM Invoice
+WHERE BillingCity = 'São Paulo';",
+C,d14,data,value,sql,False,,,True,,0,0,2.9071355829946697,9367,135,0.0010042,Counts distinct tracks of the purchased AAC audio media type that appear on at least one invoice line.,Track; MediaType; InvoiceLine,Track.TrackId; Track.MediaTypeId; MediaType.MediaTypeId; MediaType.Name; InvoiceLine.TrackId,,"SELECT COUNT(DISTINCT t.TrackId) AS track_count
+FROM Track AS t
+JOIN MediaType AS m ON t.MediaTypeId = m.MediaTypeId
+JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
+WHERE m.Name = 'Purchased AAC audio file';","SELECT COUNT(DISTINCT t.TrackId) AS track_count
+FROM Track AS t
+JOIN MediaType AS m ON t.MediaTypeId = m.MediaTypeId
+JOIN InvoiceLine AS il ON il.TrackId = t.TrackId
+WHERE m.Name = 'Purchased AAC audio file';",
+C,d15,data,value,sql,True,,,True,,0,0,2.060069625003962,9376,93,0.0009841000000000001,Counts tracks whose genre is named “Sci Fi & Fantasy.”,Track; Genre,Track.GenreId; Genre.GenreId; Genre.Name,,"SELECT COUNT(*) AS track_count
+FROM Track AS t
+JOIN Genre AS g ON t.GenreId = g.GenreId
+WHERE g.Name = 'Sci Fi & Fantasy';","SELECT COUNT(*) AS track_count
+FROM Track AS t
+JOIN Genre AS g ON t.GenreId = g.GenreId
+WHERE g.Name = 'Sci Fi & Fantasy';",
+C,d16,data,unanswerable,abstain,True,,,,,0,0,4.0795422500086715,9354,264,0.0010674,"The database records track purchases on invoices, but contains no listening records, so it cannot determine how many tracks were listened to last year.",,,,,,
+C,d17,data,unanswerable,abstain,True,,,,,0,0,2.0245298749941867,9356,55,0.0009631,"The database context contains no user ratings or rating table/column, so the tracks with the highest average user rating cannot be determined.",,,,,,
+C,d18,data,unanswerable,abstain,True,,,False,False,0,0,4.277181291006855,18771,124,0.0019391000000000002,"The actual email addresses are masked, and the database interface does not allow filtering on Customer.Email, so the number of Gmail users cannot be determined.",Customer,Customer.Email,,"SELECT COUNT(*) AS gmail_customer_count
+FROM Customer
+WHERE Email LIKE '%@gmail.com';",,"invalid: column Customer.Email is masked: select it as a plain column to get ***; it cannot be used in expressions, filters, joins, sorting, grouping, subqueries or set operations"
+C,d19,data,unanswerable,abstain,True,,,,,0,0,1.798374749996583,9358,58,0.0009648,"The database does not provide a discount amount or a pre-discount invoice value, so the total discount on 2012 invoices cannot be determined.",,,,,,
+C,d20,data,unanswerable,abstain,True,,,,,0,0,1.814646041006199,9354,57,0.0009639000000000001,"The database describes digital music tracks and sales but contains no inventory or stock-status data, so the number currently out of stock cannot be determined.",,,,,,

@@ -76,9 +76,10 @@ core/                 pipeline logic, no HTTP and no UI
   sqlite.py           read-only connections, identifier quoting
   sql_guard.py        SQL guard: SELECT only, LIMIT, timeout, masking
   documentation.py    LLM table documentation prompts, validation, export
+  evaluation.py       benchmark contexts (A, B, C), answer scoring, metrics
 api/                  FastAPI app
   main.py config.py   app and settings
-  routes/             HTTP routes: databases, pipeline, relationships, tables, sql, settings, docs
+  routes/             HTTP routes: databases, pipeline, relationships, tables, sql, settings, docs, benchmark
   payloads.py         request and response models
   appdb.py            app.db access
   jobs.py             runs pipeline steps in the background
@@ -91,6 +92,7 @@ ui/                   Streamlit UI
   widgets.py          Streamlit pieces shared by several pages
   network.py          pyvis relationship graph
   theme.py design/    design tokens
+benchmark/            questions.jsonl, gold.sql, results.csv (written by the benchmark run)
 tests/                pytest suite mirroring core/, api/ and ui/
 data/                 sample databases (only chinook.db is in git)
 ```
@@ -98,6 +100,29 @@ data/                 sample databases (only chinook.db is in git)
 The pipeline runs parse, then profile, then graph, then docs. `api/` calls the
 `core/` functions; the UI reaches them only over HTTP. App state lives in `app.db`, separate from the databases
 being analysed.
+
+## Evaluation
+
+The benchmark asks the same model the same 40 chinook questions under three contexts:
+
+- **A**: the raw DDL.
+- **B**: the generated table docs plus a relationship graph excerpt and JOIN paths.
+- **C**: everything in B plus the data profile, sample values and sample rows (masked).
+
+To run it, run all steps on chinook (the Docs step needs the OpenAI key), then press
+**Run benchmark (A / B / C)** in Management · Benchmark. It runs in the background and writes one row
+per (config, question) to `benchmark/results.csv` (`SCHEMASAGE_BENCHMARK_DIR`).
+
+- **Execution accuracy**: share of answerable data questions whose result set matches the gold query (row order ignored, column names ignored, floats rounded to 2 decimals, extra columns allowed).
+- **Valid SQL rate**: share of answerable data questions whose first answer is SQL that passes the guard and runs.
+- **Repair success**: over answerable data questions, first-attempt SQL failures the retry fixed, out of those retried.
+- **Schema fact accuracy**: over answerable schema questions, mean share of the expected tables and `Table.Column` names the answer names.
+- **Path accuracy**: over relationship and path questions, whether the answered JOIN path equals the expected one (either direction).
+- **Unsupported claim rate**: tables and columns that schema answers name but that do not exist, out of all they name (SQL answers are measured by the valid SQL rate instead).
+- **Abstention accuracy**: whether the model abstained exactly when the question is unanswerable.
+- **Mean latency, tokens, cost**: mean wall time per question, and summed tokens and cost per config.
+
+A refused answer counts as wrong.
 
 ## Safety rules
 

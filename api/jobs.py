@@ -1,15 +1,19 @@
-"""Pipeline steps (parse -> profile -> graph -> docs) and their background execution."""
+"""Pipeline steps (parse -> profile -> graph -> docs), the benchmark, and their background execution."""
 
+import csv
 import logging
 import sqlite3
 from collections.abc import Callable
 from contextlib import closing
 
 from api import llm
-from api.appdb import NOW, NotReady, connect, latest_result, load_relationships, read_app_settings
+from api.appdb import NOW, NotReady, connect, latest_result, load_graph, load_relationships, read_app_settings
+from api.config import settings
 from core.documentation import doc_basis, document_table
+from core.evaluation import CONFIGS, load_gold, load_questions, raw_ddl, run_question, summarize
 from core.parser import parse_database
 from core.profiler import profile_database
+from core.sql_guard import GuardError, run_sql
 
 log = logging.getLogger(__name__)
 
@@ -108,6 +112,87 @@ STEPS: dict[str, Callable[[sqlite3.Connection, sqlite3.Row], dict]] = {
 }
 
 
+def benchmark_questions(name: str) -> list[dict]:
+    path = settings.benchmark_dir / "questions.jsonl"
+    questions = [q for q in load_questions(path) if q["database"] == name] if path.exists() else []
+    if not questions:
+        raise NotReady(f"no benchmark questions for {name}")
+    return questions
+
+
+def _refused(config: str, question: dict) -> dict:
+    """The row of a question the model refused, in run_question's key order, scored as an empty answer."""
+    answerable_schema = question["category"] == "schema" and question["kind"] != "unanswerable"
+    return {
+        "config": config, "id": question["id"], "category": question["category"], "kind": question["kind"],
+        "answer_kind": None, "correct": False, "score": 0.0 if answerable_schema else None,
+        "path_correct": False if question["kind"] in ("relationship", "path") else None,
+        "first_valid": None, "repaired": None, "claims": 0, "unsupported": 0, "latency_s": 0.0,
+        "input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0, "answer": None, "tables": "", "columns": "",
+        "path": "", "first_sql": None, "sql": None, "error": "refused",
+    }
+
+
+def benchmark(conn: sqlite3.Connection, run: sqlite3.Row) -> dict:
+    """Every benchmark question of the database under configs A, B and C; writes results.csv at the end."""
+    db = run["database_id"]
+    questions = benchmark_questions(run["name"])
+    gold = load_gold(settings.benchmark_dir / "gold.sql")
+    app = read_app_settings(conn)
+    sources = {
+        "ddl": raw_ddl(run["path"]),
+        "model": latest_result(conn, db, "parse"),
+        "docs": {r["table_name"]: {"summary": r["summary"], "columns": r["columns"]} for r in conn.execute(
+            "SELECT table_name, summary, columns FROM table_docs WHERE database_id = ?", (db,))},
+        "relationships": load_relationships(conn, db),
+        "profile": latest_result(conn, db, "profile"),  # masked
+        "graph": load_graph(conn, db),
+    }
+    params = {"model": app.llm_model, "effort": app.reasoning_effort, "max_rows": app.max_rows,
+              "timeout_s": app.timeout_s, "input_usd_per_mtok": app.input_usd_per_mtok,
+              "output_usd_per_mtok": app.output_usd_per_mtok}
+    marks = [(m["table"], m["column"]) for m in run["masked_columns"]]  # tuples, as in profile()
+    for q in questions:  # a broken gold fails the run before any LLM call, not after half the budget
+        if q["id"] in gold:
+            try:
+                masked = run_sql(run["path"], gold[q["id"]], sources["model"], marks,
+                                 max_rows=app.max_rows, timeout_s=app.timeout_s)["masked"]
+            except GuardError as e:
+                raise RuntimeError(f"gold query {q['id']} fails: {e.kind}: {e}") from e
+            if masked:  # *** on both sides would match whatever the model picked
+                raise RuntimeError(f"gold query {q['id']} selects masked columns: {', '.join(masked)}")
+    result = {"done": 0, "total": len(CONFIGS) * len(questions)}
+
+    def progress() -> None:
+        conn.execute("UPDATE runs SET result = ? WHERE id = ?", (result, run["run_id"]))
+        conn.commit()  # no write transaction stays open while the LLM answers
+
+    progress()
+    client = llm.client()
+    rows = []
+    for config in CONFIGS:
+        for question in questions:
+            try:
+                row = run_question(client, config, question, gold.get(question["id"]), sources,
+                                   db_path=run["path"], marks=marks, llm=params)
+            except ValueError as e:
+                if type(e) is not ValueError:  # GuardError (a broken gold query) and ValidationError fail the run
+                    raise
+                row = _refused(config, question)  # ask()'s refusal: one wrong answer, not a failed run
+            rows.append(row)
+            result["done"] += 1
+            progress()
+    settings.benchmark_dir.mkdir(parents=True, exist_ok=True)
+    with open(settings.benchmark_dir / "results.csv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    return {**result, "summary": summarize(rows), "rows": rows}
+
+
+JOBS = {**STEPS, "benchmark": benchmark}  # the benchmark runs on its own, never in "all"
+
+
 def _start(conn: sqlite3.Connection, run_id: int) -> None:
     conn.execute(f"UPDATE runs SET status = 'running', started_at = {NOW} WHERE id = ?", (run_id,))
 
@@ -133,14 +218,14 @@ def execute(run_ids: list[int]) -> None:
         for i, run_id in enumerate(run_ids):
             try:
                 run = conn.execute(
-                    "SELECT runs.id AS run_id, step, database_id, path, masked_columns FROM runs"
+                    "SELECT runs.id AS run_id, step, database_id, name, path, masked_columns FROM runs"
                     " JOIN databases ON databases.id = runs.database_id WHERE runs.id = ?",
                     (run_id,),
                 ).fetchone()
                 # The step's writes, marking it done, and starting the next step commit together,
-                # so no other pipeline can grab the database between two steps (the docs step also commits per table).
+                # so no other pipeline can grab the database between two steps (docs and benchmark commit per item).
                 with conn:
-                    result = STEPS[run["step"]](conn, run)
+                    result = JOBS[run["step"]](conn, run)
                     conn.execute(f"UPDATE runs SET status = 'done', result = ?, finished_at = {NOW} WHERE id = ?",
                                  (result, run_id))
                     if i + 1 < len(run_ids):
