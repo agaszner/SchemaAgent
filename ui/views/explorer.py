@@ -100,6 +100,43 @@ def profile_rows(table: dict, stats: dict) -> list[dict]:
     return rows
 
 
+def unique_names(names: list[str]) -> list[str]:
+    seen: dict[str, int] = {}
+    out = []
+    for n in names:
+        seen[n] = seen.get(n, 0) + 1
+        out.append(n if seen[n] == 1 else f"{n} ({seen[n]})")
+    return out
+
+
+def render_sql(db: dict, table: dict) -> None:
+    with st.form("sql_form", border=False):
+        text = st.text_area("SQL", key="sql:text", placeholder=f'SELECT * FROM "{table["name"]}"')
+        run = st.form_submit_button("Run", key="sql:run")
+    if run:
+        try:
+            outcome = api_client.request("POST", f"/databases/{db['id']}/sql", json={"sql": text})
+        except api_client.ApiError as err:
+            outcome = err.detail
+        st.session_state["sql:result"] = (db["id"], outcome)
+    stored = st.session_state.get("sql:result")
+    if not stored or stored[0] != db["id"]:
+        return
+    result = stored[1]
+    if isinstance(result, str):
+        st.error(result)
+        return
+    st.code(result["sql"], language="sql")
+    names = unique_names(result["columns"])
+    st.dataframe([dict(zip(names, row)) for row in result["rows"]] or {name: [] for name in names}, hide_index=True)
+    note = [f"{len(result['rows']):,} rows"]
+    if result["limited"]:
+        note.append("stopped at the row limit (Management · Settings)")
+    if result["masked"]:
+        note.append(f"masked: {', '.join(dict.fromkeys(result['masked']))}")
+    st.caption(" · ".join(note))
+
+
 db = widgets.require_database()
 st.title("Explorer")
 st.caption(f"{db['name']} · read-only")
@@ -143,7 +180,7 @@ if chips:
     for col, (label, target, key) in zip(st.columns(len(chips)), chips):
         col.button(label, key=key, on_click=open_table, args=(target,))
 
-profile_tab, data_tab = st.tabs(["Profile", "Data"])
+profile_tab, data_tab, sql_tab = st.tabs(["Profile", "Data", "SQL"])
 with profile_tab:
     if name not in stats or not {c["name"] for c in table["columns"]} <= {c["name"] for c in stats[name]["columns"]}:
         st.info("Run profile to see column statistics.")
@@ -156,3 +193,5 @@ with profile_tab:
             "Nulls": st.column_config.ProgressColumn(min_value=0, max_value=100, format="%.1f%%")})
 with data_tab:
     render_data(db, table)
+with sql_tab:
+    render_sql(db, table)

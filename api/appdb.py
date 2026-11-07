@@ -5,8 +5,10 @@ import sqlite3
 from contextlib import closing
 
 import networkx as nx
+from pydantic import ValidationError
 
 from api.config import settings
+from api.payloads import AppSettings
 from core.graph import add_relation
 
 # Lists and dicts bind as JSON text, and columns declared JSON read back as lists and dicts
@@ -63,6 +65,12 @@ CREATE TABLE IF NOT EXISTS relationship_log (
     actor TEXT NOT NULL,
     at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
+
+-- one row of user settings as JSON; missing keys take AppSettings defaults, so new settings need no migration
+CREATE TABLE IF NOT EXISTS app_settings (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    value JSON NOT NULL
+);
 """
 
 
@@ -113,3 +121,12 @@ def load_graph(conn: sqlite3.Connection, database_id: int) -> nx.MultiDiGraph:
                "ref_columns": row["to_columns"], "confidence": row["confidence"]}
         add_relation(graph, rel, source=row["source"], status=row["status"])
     return graph
+
+
+def read_app_settings(conn: sqlite3.Connection) -> AppSettings:
+    """Stored settings over the defaults."""
+    row = conn.execute("SELECT value FROM app_settings WHERE id = 1").fetchone()
+    try:
+        return AppSettings(**(row["value"] if row else {}))
+    except ValidationError:  # a bad stored row must not lock the user out of Settings
+        return AppSettings()

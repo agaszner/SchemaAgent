@@ -21,6 +21,7 @@ make dev       # start the API and the UI together
 
 Then open http://localhost:8501. In **Management**, register `data/chinook.db`
 (the sample database in the repo), then press **Run all steps** on the Home page.
+The **Explorer** page then browses tables and runs read-only queries in its SQL tab.
 
 `make dev` runs both servers in one terminal and Ctrl-C stops both. To run them
 in separate terminals, use `make api` and `make ui`.
@@ -49,6 +50,8 @@ Set these as environment variables or in a `.env` file at the repo root.
 | `SCHEMASAGE_DATA_DIR` | `data` | Only databases inside this folder can be registered |
 | `SCHEMASAGE_API_URL` | `http://127.0.0.1:8000` | Where the UI finds the API |
 
+The SQL row limit and query timeout are set in Management · Settings (stored in app.db).
+
 ## Command-line tools
 
 ```bash
@@ -64,16 +67,17 @@ core/                 pipeline logic, no HTTP and no UI
   profiler.py         data profile, masking, FK candidates
   graph.py            relationship graph and JOIN paths
   sqlite.py           read-only connections, identifier quoting
+  sql_guard.py        SQL guard: SELECT only, LIMIT, timeout, masking
 api/                  FastAPI app
   main.py config.py   app and settings
-  routes/             HTTP routes: databases, pipeline, relationships
+  routes/             HTTP routes: databases, pipeline, relationships, tables, sql, settings
   payloads.py         request and response models
   appdb.py            app.db access
   jobs.py             runs pipeline steps in the background
 ui/                   Streamlit UI
   main.py             entry point: theme, sidebar, navigation
   api_client.py       HTTP client for api/
-  views/              pages: home, pipeline, management (+ management_tabs/)
+  views/              pages: home, pipeline, explorer, management (+ management_tabs/)
   markup.py           HTML builders and formatters
   widgets.py          Streamlit pieces shared by several pages
   network.py          pyvis relationship graph
@@ -92,5 +96,8 @@ being analysed.
 - Table and column names are quoted, and values are passed as bound parameters.
 - Columns that look like personal data are masked (`***`) before any value
   could reach an LLM.
+- SQL runs only after sqlglot validation: one SELECT over known tables and columns,
+  with a row limit and a timeout. Masked columns can only be selected (their values
+  come back as `***`), never filtered, joined, sorted or grouped on.
 - Declared foreign keys cannot be deleted, only disabled. Rejected relationship
   candidates are never proposed again. Every change to a relationship is logged.

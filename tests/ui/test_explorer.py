@@ -94,3 +94,38 @@ def test_explorer_chip_clears_sidebar_filter(ui, chinook):
     assert at.radio(key="explorer_table").value == "Customer"
     at.button(key="open:Employee").click().run()
     assert at.radio(key="explorer_table").value == "Employee"
+
+
+def _run_sql(at, sql):
+    at.text_area(key="sql:text").input(sql)
+    at.button(key="sql:run").click().run()
+    return at
+
+
+def test_sql_tab_runs_query_with_masking(ui, chinook):
+    at = _run_sql(_open(ui, chinook, "Customer"), "SELECT CustomerId, Email FROM Customer ORDER BY CustomerId")
+    assert not at.exception and at.dataframe[-1].value.iloc[0].tolist() == [1, "***"]
+    assert any(c.value == "59 rows · masked: Email" for c in at.caption)
+
+
+def test_sql_tab_shows_refusal(ui, chinook):
+    at = _run_sql(_open(ui, chinook, "Track"), "DELETE FROM Track")
+    assert at.error[0].value == "only SELECT queries are allowed"
+
+
+def test_sql_tab_handles_duplicate_column_names(ui, chinook):
+    at = _run_sql(_open(ui, chinook, "Album"), "SELECT * FROM Album JOIN Artist ON Album.ArtistId = Artist.ArtistId")
+    assert not at.exception
+    assert list(at.dataframe[-1].value.columns) == ["AlbumId", "Title", "ArtistId", "ArtistId (2)", "Name"]
+
+
+def test_sql_tab_reports_the_row_limit(ui, client, chinook):
+    client.put("/api/settings", json={"max_rows": 5, "timeout_s": 5})
+    at = _run_sql(_open(ui, chinook, "Track"), "SELECT Name FROM Track")
+    assert any(c.value == "5 rows · stopped at the row limit (Management · Settings)" for c in at.caption)
+
+
+def test_sql_tab_shows_headers_for_zero_rows(ui, chinook):
+    at = _run_sql(_open(ui, chinook, "Track"), "SELECT Name FROM Track WHERE 0")
+    assert not at.exception and list(at.dataframe[-1].value.columns) == ["Name"]
+    assert any(c.value == "0 rows" for c in at.caption)

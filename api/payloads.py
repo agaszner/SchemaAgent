@@ -5,6 +5,8 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, Field, model_validator
 
+from core.sql_guard import DEFAULT_MAX_ROWS, DEFAULT_TIMEOUT_S
+
 
 class ColumnRef(BaseModel):
     table: str
@@ -103,3 +105,12 @@ class RelationshipCheck(BaseModel):
     from_types: list[str | None]
     to_types: list[str | None]
     warnings: list[str]
+
+
+class AppSettings(BaseModel):
+    max_rows: int = Field(DEFAULT_MAX_ROWS, ge=1, le=1000)
+    timeout_s: float = Field(DEFAULT_TIMEOUT_S, ge=0.1, le=60)
+
+
+class SqlIn(BaseModel):
+    sql: str = Field(max_length=20_000)
