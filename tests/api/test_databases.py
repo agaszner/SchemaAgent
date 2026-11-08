@@ -73,3 +73,23 @@ def test_masking_rejects_unknown_columns_and_running_pipelines(client, chinook):
     with closing(sqlite3.connect(settings.app_db)) as conn, conn:
         conn.execute("INSERT INTO runs (database_id, step, status) VALUES (?, 'parse', 'running')", (chinook,))
     assert client.put(url, json={"columns": []}).status_code == 409
+
+
+def test_delete_drops_app_rows_and_allows_registering_again(client, chinook, tmp_path, fake_llm):
+    fake_llm.script = [{"kind": "schema", "answer": "Genre.", "tables": ["Genre"], "columns": []}]
+    assert client.post(f"/api/databases/{chinook}/chat", json={"question": "Where are genres?"}).status_code == 201
+    url = f"/api/databases/{chinook}"
+    with closing(sqlite3.connect(settings.app_db)) as conn, conn:
+        conn.execute("INSERT INTO runs (database_id, step, status) VALUES (?, 'parse', 'running')", (chinook,))
+    assert client.delete(url).status_code == 409
+    with closing(sqlite3.connect(settings.app_db)) as conn, conn:
+        conn.execute("UPDATE runs SET status = 'done' WHERE status = 'running'")
+
+    assert client.delete(url).status_code == 204
+    assert client.get(url).status_code == 404 and client.delete(url).status_code == 404
+    with closing(sqlite3.connect(settings.app_db)) as conn:
+        for table in ("runs", "relationship_log", "relationships", "table_docs", "chat_messages"):
+            assert conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0] == 0, table
+    assert (tmp_path / "chinook.db").is_file()
+    again = client.post("/api/databases", json={"path": str(tmp_path / "chinook.db")})
+    assert again.status_code == 201 and again.json()["name"] == "chinook"

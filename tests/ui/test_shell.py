@@ -87,3 +87,13 @@ def test_home_points_to_the_failed_step(ui, client, tmp_path):
     assert "Parse step failed" in html and "DatabaseError" in html
     at.button(key="open_pipeline").click().run()
     assert at.title[0].value == "Pipeline"
+
+
+def test_picker_restores_the_choice_switch_page_dropped(ui, chinook, shop):
+    # In the browser, st.switch_page drops the picker's widget value; main.py restores it from a plain key.
+    at = ui(database_id=shop)
+    at.session_state["database_id"] = chinook  # what the browser falls back to after the drop
+    at.run()
+    assert at.sidebar.selectbox(key="database_id").value == shop
+    at.sidebar.selectbox(key="database_id").set_value(chinook).run()
+    assert at.session_state["selected_database"] == chinook

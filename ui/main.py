@@ -24,14 +24,24 @@ except httpx.TransportError:
     st.stop()
 
 names = {db["id"]: db["name"] for db in databases}
-if st.session_state.get("database_id") not in names:
+# st.switch_page drops the picker's widget value in the browser (not in AppTest), so the choice is
+# also kept under a plain key, which Streamlit never cleans up.
+if st.session_state.get("selected_database") in names:
+    st.session_state["database_id"] = st.session_state["selected_database"]
+elif st.session_state.get("database_id") not in names:
     st.session_state["database_id"] = next(iter(names), None)
+
+
+def _remember_database() -> None:
+    st.session_state["selected_database"] = st.session_state["database_id"]
+
 
 with st.sidebar:
     st.markdown("**SchemaSage**")  # not st.title: the page owns the one title
     st.caption("read-only access")
-    st.selectbox("Database", list(names), key="database_id", format_func=names.get)
+    st.selectbox("Database", list(names), key="database_id", format_func=names.get, on_change=_remember_database)
     for p in PAGES:
         st.page_link(p)
+_remember_database()
 
 page.run()

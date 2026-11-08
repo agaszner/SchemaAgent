@@ -17,10 +17,40 @@ def _submit(path: str, **kwargs) -> None:
     st.rerun()
 
 
+def _remove(databases: list[dict]) -> None:
+    """Pick a database, press Remove, then confirm: removal drops its review work from app.db."""
+    names = {d["id"]: d["name"] for d in databases}
+    pick, button = st.columns([3, 1], vertical_alignment="bottom")
+    target = pick.selectbox("Remove a database", list(names), format_func=names.get, key="remove_target")
+    if st.session_state.get("remove_pending") != target:
+        if button.button("Remove", key="remove"):
+            st.session_state["remove_pending"] = target
+            st.rerun()
+        return
+    st.warning(f"Removing {names[target]} deletes its runs, docs, relationship decisions, change log and chat log "
+               "from app.db. The file stays on disk, so you can register it again.")
+    confirm, cancel, _ = st.columns([1, 1, 4])
+    if confirm.button("Remove", key="remove_confirm", type="primary"):
+        try:
+            api_client.request("DELETE", f"/databases/{target}")
+        except api_client.ApiError as err:
+            st.error(err.detail)
+            return
+        st.session_state.pop("remove_pending", None)
+        st.toast(f"Removed {names[target]}")
+        st.rerun()
+    if cancel.button("Cancel", key="remove_cancel"):
+        st.session_state.pop("remove_pending", None)
+        st.rerun()
+
+
 def render(db: dict | None) -> None:
+    databases = api_client.request("GET", "/databases")
     st.subheader("Registered databases")
-    st.caption(f"{len(api_client.request('GET', '/databases'))} · all opened read-only")
+    st.caption(f"{len(databases)} · all opened read-only")
     databases_table()
+    if databases:
+        _remove(databases)
     upload, register = st.columns(2, border=True)
     with upload, st.form("upload_form", clear_on_submit=True):
         st.markdown("**Upload a file**")

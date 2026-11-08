@@ -12,6 +12,8 @@ and serves all of it through a FastAPI backend and a Streamlit UI.
 - [uv](https://docs.astral.sh/uv/)
 - `make` (preinstalled on macOS and most Linux distributions)
 
+Without uv: `pip install -r requirements.txt` (exported with `uv export --no-hashes --no-emit-project -o requirements.txt`).
+
 ## Quick start
 
 ```bash
@@ -103,6 +105,42 @@ The pipeline runs parse, then profile, then graph, then docs. `api/` calls the
 `core/` functions; the UI reaches them only over HTTP. App state lives in `app.db`, separate from the databases
 being analysed.
 
+## Demo
+
+The six demo steps of the project plan, all in the UI.
+
+### Preparation (once, before the demo)
+
+Chinook has only declared foreign keys, so it has no suggestion to accept. formula_1 has one.
+The Benchmark tab shows the last benchmark run stored in app.db, not `benchmark/results.csv`.
+
+1. Run `data/download.sh hard` (fetches formula_1), then `make dev` and open http://localhost:8501.
+2. Management · Databases · Register a path: `data/chinook.db`, then
+   `data/bird/formula_1/formula_1.sqlite` with display name `formula_1`.
+3. Select `formula_1` in the sidebar. On the Pipeline page, run parse, profile and graph (Docs is not needed).
+4. Select `chinook`, run Management · Benchmark · **Run benchmark (A / B / C)**. It takes a few
+   minutes and costs about $0.06.
+
+### Steps
+
+1. **Pipeline (chinook).** Press **Run all steps**. Show the step statuses and durations, the stats
+   (11 tables, 64 columns, 11 FKs), the run log and the graph (declared edges in blue).
+2. **Management.**
+   - Accept a suggestion: select `formula_1`, open Relationships, set Status to `proposed`, press
+     **Accept** on `pitStops (raceId, driverId, lap) → lapTimes`. Open the Change log to show who, when and what.
+   - Add a manual relationship (chinook): New relationship, `Invoice.BillingCountry` →
+     `Customer.Country`. The Value match panel shows 100%. Cardinality `N:M`, a note, **Save**.
+     Optionally enter `Customer.Country` → `Employee.Country` without saving: Employee has only
+     Canada, so the low-match warning appears.
+   - Fix a description: Documentation, table `MediaType`, edit the summary or a column, **Save**, then **Approve**.
+3. **Chat, schema question with a path.** `How do I get from Customer to Track?` Open the evidence
+   panel: JOIN path Customer → Invoice → InvoiceLine → Track and the tool calls.
+4. **Chat, data question.** `Which 5 artists have the most revenue?` Show the SQL, the result table,
+   latency and token cost, and give a thumbs up.
+5. **Chat, refusal and abstention.** `Delete all customers from Germany.` is refused.
+   `How many tracks were listened to last year?` is answered with not enough information.
+6. **Benchmark.** Management · Benchmark (chinook) shows the A / B / C table from the preparation run.
+
 ## Evaluation
 
 The benchmark asks the same model the same 40 questions per database under three contexts:
@@ -142,6 +180,14 @@ A refused answer counts as wrong.
 | Unsupported claim rate | 0% | 0% | 0% | 0% | 0% | 0% |
 | Abstention accuracy | 100% | 98% | 100% | 88% | 88% | 90% |
 | Cost (40 questions) | $0.008 | $0.015 | $0.040 | $0.006 | $0.012 | $0.035 |
+
+```mermaid
+xychart-beta
+    title "Execution accuracy on answerable data questions"
+    x-axis ["chinook A", "chinook B", "chinook C", "financial A", "financial B", "financial C"]
+    y-axis "Execution accuracy (%)" 0 --> 100
+    bar [87, 87, 93, 67, 80, 80]
+```
 
 Repair success has no value on either database: no answerable question needed a retry. The valid SQL rate
 drops on financial because the model abstained instead of writing SQL, not because SQL failed.
@@ -218,3 +264,28 @@ and the SDK expects `AsyncOpenAI`.
   come back as `***`), never filtered, joined, sorted or grouped on.
 - Declared foreign keys cannot be deleted, only disabled. Rejected relationship
   candidates are never proposed again. Every change to a relationship is logged.
+
+## Limitations
+
+- **Business logic is not in the schema.** What counts as an "active customer" usually lives in
+  existing SQL code or business documents. SchemaSage sees only the schema and the data, so it cannot
+  know such rules.
+- **Valid SQL can still give a wrong answer.** The SQL guard checks the shape of a query (one SELECT,
+  known tables and columns, limit, timeout), not its meaning. A wrong JOIN or filter passes, as in
+  fd12 above (`type = 'VYBER'` where card withdrawals are `VYDAJ`).
+- **Opaque names need a human.** Columns like `district.A4`..`A16` carry no meaning in their names or
+  values. The docs mark them as unspecified until someone edits them in the Documentation tab.
+- **Masking is by name.** Columns are masked when their names match the patterns (email, phone, fax,
+  address) or when a user marks them. Other personal data, such as `client.birth_date` in financial,
+  stays unmasked until marked. Real data also needs access control, which this project leaves out.
+- **Path search is shortest path only.** `find_path` takes a shortest route in the graph, which can be
+  wrong in meaning when two routes tie (client to account in financial). A join the model writes over
+  a rejected relationship is not blocked.
+- **The benchmark is small.** 40 questions per database, one run per config. Chinook is at the ceiling,
+  and BIRD financial is public, so the model may know parts of it.
+- **SQLite only, one local user.** There is no authentication; the actor in the relationship log is the
+  `X-Actor` header (default `local`).
+
+Possible extensions: inferring hidden foreign keys with measured precision and recall, a small local
+model (Ollama) against the API model, the five agent tools as an MCP server, and for workplace use
+schema diff, SQL lineage and a business glossary.

@@ -81,6 +81,20 @@ def read_database(db: Database) -> dict:
     return dict(db)
 
 
+@router.delete("/{database_id}", status_code=204)
+def delete_database(db: Database, conn: Conn) -> None:
+    """Unregister: drops the database's app.db rows. The file stays on disk, so it can be registered again."""
+    # Write lock before the check: a concurrent POST /runs waits for this commit and then gets 404
+    conn.execute("BEGIN IMMEDIATE")
+    # A background run would write rows for a database that no longer exists
+    in_progress = "SELECT 1 FROM runs WHERE database_id = ? AND status IN ('queued', 'running') LIMIT 1"
+    if conn.execute(in_progress, (db["id"],)).fetchone():
+        raise HTTPException(409, "a pipeline run is in progress")
+    for table in ("runs", "relationship_log", "relationships", "table_docs", "chat_messages"):
+        conn.execute(f"DELETE FROM {table} WHERE database_id = ?", (db["id"],))
+    conn.execute("DELETE FROM databases WHERE id = ?", (db["id"],))
+
+
 @router.put("/{database_id}/masking", response_model=DatabaseOut)
 def set_masking(body: MaskingIn, db: Database, conn: Conn) -> dict:
     # Write lock before the check: a concurrent POST /runs waits for this commit, so its profile reads the new marks
