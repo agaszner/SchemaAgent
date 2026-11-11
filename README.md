@@ -59,6 +59,8 @@ Set these as environment variables or in a `.env` file at the repo root.
 | `SCHEMASAGE_API_URL` | `http://127.0.0.1:8000` | Where the UI finds the API |
 | `SCHEMASAGE_EXPORT_DIR` | `docs` | Where Export Markdown writes `tables/<Table>.md` and `schema_overview.md` |
 | `OPENAI_API_KEY` | none | OpenAI API key; the Docs step needs it |
+| `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` | none | Set both to trace every LLM call (docs, agent, benchmark) to Langfuse |
+| `LANGFUSE_BASE_URL` | `https://cloud.langfuse.com` | Langfuse server, e.g. `https://us.cloud.langfuse.com` or a self-hosted URL |
 
 The SQL row limit, query timeout, LLM model, reasoning effort and token prices are set in Management · Settings (stored in app.db).
 

@@ -5,6 +5,7 @@ description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.156.8",
+    "langfuse>=5.2.0",
     "networkx>=3.7",
     "openai>=3.46.0",
     "pyvis>=0.3.2",

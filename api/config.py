@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     export_dir: Path = Path("docs")
     benchmark_dir: Path = Path("benchmark")  # questions.jsonl and gold.sql in, results.csv out
     openai_api_key: SecretStr | None = Field(None, validation_alias="OPENAI_API_KEY")  # alias bypasses the prefix
+    # Langfuse tracing turns on when both keys are set
+    langfuse_public_key: str | None = Field(None, validation_alias="LANGFUSE_PUBLIC_KEY")
+    langfuse_secret_key: SecretStr | None = Field(None, validation_alias="LANGFUSE_SECRET_KEY")
+    langfuse_base_url: str = Field("https://cloud.langfuse.com", validation_alias="LANGFUSE_BASE_URL")
 
 
 settings = Settings()
