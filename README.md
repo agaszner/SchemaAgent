@@ -171,16 +171,18 @@ column; a run replaces only its own database's rows.
 
 A refused answer counts as wrong.
 
-### Results (gpt-6-luna, reasoning effort low, 2026-11-07)
+### Results (gpt-6-luna, reasoning effort low; chinook 2026-11-08, financial 2026-11-07)
+
+The numbers come from `benchmark/results.csv`.
 
 | Metric | chinook A | B | C | financial A | B | C |
 |---|---:|---:|---:|---:|---:|---:|
-| Execution accuracy | 87% | 87% | 93% | 67% | 80% | 80% |
-| Valid SQL rate | 100% | 93% | 100% | 73% | 80% | 87% |
+| Execution accuracy | 73% | 87% | 100% | 67% | 80% | 80% |
+| Valid SQL rate | 93% | 100% | 100% | 73% | 80% | 87% |
 | Schema fact accuracy | 100% | 100% | 100% | 88% | 93% | 84% |
 | Path accuracy | 100% | 100% | 100% | 90% | 100% | 90% |
 | Unsupported claim rate | 0% | 0% | 0% | 0% | 0% | 0% |
-| Abstention accuracy | 100% | 98% | 100% | 88% | 88% | 90% |
+| Abstention accuracy | 98% | 100% | 100% | 88% | 88% | 90% |
 | Cost (40 questions) | $0.008 | $0.015 | $0.040 | $0.006 | $0.012 | $0.035 |
 
 ```mermaid
@@ -188,14 +190,21 @@ xychart-beta
     title "Execution accuracy on answerable data questions"
     x-axis ["chinook A", "chinook B", "chinook C", "financial A", "financial B", "financial C"]
     y-axis "Execution accuracy (%)" 0 --> 100
-    bar [87, 87, 93, 67, 80, 80]
+    bar [73, 87, 100, 67, 80, 80]
 ```
 
 Repair success has no value on either database: no answerable question needed a retry. The valid SQL rate
-drops on financial because the model abstained instead of writing SQL, not because SQL failed.
+is below 100% where the model abstained instead of writing SQL (chinook A on d14, and financial), not
+because SQL failed.
 
-Chinook is at the ceiling: readable names and declared keys let even the raw DDL answer the schema
-questions. On financial:
+Chinook schema questions are at the ceiling: readable names and declared keys let even the raw DDL
+answer them. The difference is in the value questions (d11..d15), as the spec expects: without values, A
+wrote `City = 'Montreal'` and `BillingCity = 'Sao Paulo'` (stored as `'Montréal'` and `'São Paulo'`) and
+`'Science Fiction & Fantasy'` (stored as `'Sci Fi & Fantasy'`), and abstained on purchased AAC files
+(`'Purchased AAC audio file'`). B fixed two of these from the generated docs (it still missed d12 and
+d14); C, with the full profile, answered all 15 answerable data questions correctly.
+
+On financial:
 
 - **A loses on Czech codes.** Without values it cannot know that money in is `type = 'PRIJEM'`, that
   `'POPLATEK MESICNE'` means monthly, or that card withdrawals are `operation = 'VYBER KARTOU'`
@@ -283,8 +292,8 @@ and the SDK expects `AsyncOpenAI`.
 - **Path search is shortest path only.** `find_path` takes a shortest route in the graph, which can be
   wrong in meaning when two routes tie (client to account in financial). A join the model writes over
   a rejected relationship is not blocked.
-- **The benchmark is small.** 40 questions per database, one run per config. Chinook is at the ceiling,
-  and BIRD financial is public, so the model may know parts of it.
+- **The benchmark is small.** 40 questions per database, one run per config. Chinook schema questions are
+  at the ceiling, and BIRD financial is public, so the model may know parts of it.
 - **SQLite only, one local user.** There is no authentication; the actor in the relationship log is the
   `X-Actor` header (default `local`).
 
